@@ -9,3 +9,18 @@ services:
       - "3000:3000"
     volumes:
       - .:/app
+
+  db:
+    image: postgis/postgis
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: costurai
+      POSTGRES_PASSWORD: costurai
+      POSTGRES_DB: costurai
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/database/01-init.sql:/docker-entrypoint-initdb.d/database/01-init.sql
+
+volumes:
+  postgres_data:

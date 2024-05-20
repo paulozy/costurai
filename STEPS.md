@@ -13,11 +13,12 @@ Os clientes, por sua vez, poderão buscar por costureiras próximas a sua locali
 ## Funcionalidades
 
 - Cadastro de costureiras
-- [] Cadastro de clientes
-- [] Busca de costureiras por localização
-- [] Busca de costureiras por serviços oferecidos
-- [] Avaliação de costureiras
-- [] Comentários sobre costureiras
+- [x] Cadastro de costureiras
+- [x] Login de costureiras
+- [X] Busca de costureiras por localização
+- [X] Busca de costureiras por serviços oferecidos
+- [X] Avaliação de costureiras
+- [X] Comentários sobre costureiras
 - [] Contato com costureiras
 
 ## Entidades
@@ -40,16 +41,16 @@ Os clientes, por sua vez, poderão buscar por costureiras próximas a sua locali
 
 - Costureira
 
-  - [] Não pode se cadastrar sem nome
-  - [] Não pode se cadastrar sem contato
-  - [] Não pode se cadastrar sem local de atendimento
-  - [] Não pode se cadastrar sem serviços oferecidos
+  - [x] Não pode se cadastrar sem nome
+  - [x] Não pode se cadastrar sem contato
+  - [x] Não pode se cadastrar sem local de atendimento
+  - [x] Não pode se cadastrar sem serviços oferecidos
 
 - Cliente
-  - [] Não é obrigatório cadastrar para buscar costureiras
-  - [] Pode buscar costureiras por localização e serviços oferecidos
-  - [] Para buscar costureiras por localização, é necessário informar a localização e a distância máxima
-  - [] Para avaliar costureiras, é necessário se cadastrar
-  - [] Não pode se cadastrar sem nome
-  - [] Não pode se cadastrar sem localização
-  - [] Não pode avaliar costureiras sem comentários
+  - [X] Não é obrigatório cadastrar para buscar costureiras
+  - [X] Pode buscar costureiras por localização e serviços oferecidos
+  - [X] Para buscar costureiras por localização, é necessário informar a localização e a distância máxima
+  - [X] Para avaliar costureiras, é necessário se cadastrar
+  - [X] Não pode se cadastrar sem nome
+  - [X] Não pode se cadastrar sem localização
+  - [X] Não pode avaliar costureiras sem comentários
