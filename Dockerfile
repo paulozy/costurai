@@ -13,4 +13,5 @@ RUN go build -o cmd/main cmd/main.go
 
 EXPOSE 3000
 
-CMD ["cmd/main"]
+# CMD tail -f /dev/null
+CMD ["./cmd/main"]
