@@ -106,6 +106,145 @@ func (r *DressmakerRepository) Exists(email string) (bool, error) {
 	return exists, nil
 }
 
+func (r *DressmakerRepository) Find(searchParams GetDressmakersParams) ([]entity.Dressmaker, error) {
+	var dressmakers []entity.Dressmaker
+
+	var stmt *sql.Stmt
+	var err error
+	var rows *sql.Rows
+
+	searchByServices := searchParams.Services != "" && searchParams.Latitude == 0 && searchParams.Longitude == 0 && searchParams.Distance == 0
+	searchyByProximity := searchParams.Latitude != 0 && searchParams.Longitude != 0 && searchParams.Distance != 0 && searchParams.Services == ""
+
+	if searchParams.Default {
+		stmt, err = r.DB.Prepare(`
+		SELECT 
+				id, 
+				email,
+				password, 
+				name, 
+				contact, 
+				ST_Y(location::geometry) as latitude, 
+				ST_X(location::geometry) as longitude, 
+				services, 
+				grade, 
+				created_at, 
+				updated_at
+			FROM dressmakers
+		`)
+		if err != nil {
+			fmt.Printf("error on exec query: %v\n", err)
+			return nil, err
+		}
+
+		rows, err = stmt.Query()
+		if err != nil {
+			fmt.Printf("error on exec query: %v\n", err)
+			return nil, err
+		}
+	} else if searchByServices {
+		keywords := strings.Split(searchParams.Services, ", ")
+		query := generateILikeQuery(keywords)
+
+		stmt, err = r.DB.Prepare(query)
+		if err != nil {
+			fmt.Printf("error on exec query: %v\n", err)
+			return nil, err
+		}
+
+		args := make([]interface{}, len(keywords))
+		for i, keyword := range keywords {
+			args[i] = "%" + keyword + "%"
+		}
+
+		rows, err = stmt.Query(args...)
+		if err != nil {
+			fmt.Printf("error on exec query: %v\n", err)
+			return nil, err
+		}
+	} else if searchyByProximity {
+		stmt, err = r.DB.Prepare(`
+			SELECT 
+				id, 
+				email,
+				password, 
+				name, 
+				contact, 
+				ST_Y(location::geometry) as latitude, 
+				ST_X(location::geometry) as longitude, 
+				services, 
+				grade, 
+				created_at, 
+				updated_at
+			FROM dressmakers
+			WHERE 
+				ST_DWithin(
+						location,
+						ST_MakePoint($1, $2)::geography,
+						$3
+				);
+		`)
+		if err != nil {
+			fmt.Printf("error on exec query: %v\n", err)
+			return nil, err
+		}
+
+		rows, err = stmt.Query(searchParams.Latitude, searchParams.Longitude, searchParams.Distance)
+		if err != nil {
+			fmt.Printf("error on exec query: %v\n", err)
+			return nil, err
+		}
+	} else {
+		keywords := strings.Split(searchParams.Services, ", ")
+		query := generateFullyILikeQuery(keywords)
+
+		stmt, err = r.DB.Prepare(query)
+		if err != nil {
+			fmt.Printf("error on exec query: %v\n", err)
+			return nil, err
+		}
+
+		args := make([]interface{}, len(keywords)+3)
+		args[0] = searchParams.Latitude
+		args[1] = searchParams.Longitude
+		args[2] = searchParams.Distance
+
+		for i, keyword := range keywords {
+			args[i+3] = "%" + keyword + "%"
+		}
+
+		rows, err = stmt.Query(args...)
+	}
+
+	for rows.Next() {
+		var dressmaker entity.Dressmaker
+		var services string
+
+		err := rows.Scan(
+			&dressmaker.ID,
+			&dressmaker.Email,
+			&dressmaker.Password,
+			&dressmaker.Name,
+			&dressmaker.Contact,
+			&dressmaker.Location.Latitude,
+			&dressmaker.Location.Longitude,
+			&services,
+			&dressmaker.Grade,
+			&dressmaker.CreatedAt,
+			&dressmaker.UpdatedAt,
+		)
+		if err != nil {
+			fmt.Printf("error on scan rows: %v\n", err)
+			return nil, err
+		}
+
+		dressmaker.Services = strings.Split(services, ", ")
+		dressmakers = append(dressmakers, dressmaker)
+	}
+
+	return dressmakers, nil
+}
+
 func (r *DressmakerRepository) FindByID(id string) (*entity.Dressmaker, error) {
 	var dressmaker entity.Dressmaker
 
@@ -336,12 +475,45 @@ func generateILikeQuery(keywords []string) string {
         FROM dressmakers
         WHERE `
 
-		var conditions []string
-		for i := range keywords {
-			conditions = append(conditions,  fmt.Sprintf("services ILIKE $%d", i+1))
-		}
+	var conditions []string
+	for i := range keywords {
+		conditions = append(conditions, fmt.Sprintf("services ILIKE $%d", i+1))
+	}
 
-		fullQuery := baseQuery + strings.Join(conditions, " OR ")
+	fullQuery := baseQuery + strings.Join(conditions, " OR ")
 
-		return fullQuery
+	return fullQuery
+}
+
+func generateFullyILikeQuery(keywords []string) string {
+	baseQuery := `
+		SELECT
+			id,
+			email,
+			password,
+			name,
+			contact,
+			ST_Y(location::geometry) as latitude,
+			ST_X(location::geometry) as longitude,
+			services,
+			grade,
+			created_at,
+			updated_at
+		FROM dressmakers
+		WHERE 
+			ST_DWithin(
+				location,
+				ST_MakePoint($1, $2)::geography,
+				$3
+			)
+	`
+
+	var conditions []string
+	for i := range keywords {
+		conditions = append(conditions, fmt.Sprintf("services ILIKE $%d", i+1))
+	}
+
+	fullQuery := baseQuery + strings.Join(conditions, " AND ")
+
+	return fullQuery
 }

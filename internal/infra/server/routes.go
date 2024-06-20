@@ -25,13 +25,15 @@ func addDressmakerRoutes(db *sql.DB) {
 	getDressmakersByProximityUseCase := usecases.NewGetDressmakersByProximityUseCase(dressMakerRepository)
 	getDressmakersByServicesUseCase := usecases.NewGetDressmakersByServicesUseCase(dressMakerRepository)
 	addDressmakerReviewUseCase := usecases.NewAddDressmakerReviewUseCase(dressMakerRepository, dressMakerReviewsRepository)
+	getDressmakersUseCase := usecases.NewGetDressmakersUseCase(dressMakerRepository)
 
 	dressmakerUseCases := controllers.DressmakerUseCasesInput{
-		CreateDressmakerUseCase: createDressmakerUseCase,
-		UpdateDressmakerUseCase: updateDressmakerUseCase,
+		CreateDressmakerUseCase:          createDressmakerUseCase,
+		UpdateDressmakerUseCase:          updateDressmakerUseCase,
 		GetDressmakersByProximityUseCase: getDressmakersByProximityUseCase,
-		GetDressmakersByServicesUseCase: getDressmakersByServicesUseCase,
-		AddDressmakerReviewUseCase: addDressmakerReviewUseCase,
+		GetDressmakersByServicesUseCase:  getDressmakersByServicesUseCase,
+		AddDressmakerReviewUseCase:       addDressmakerReviewUseCase,
+		GetDressmakersUseCase:            getDressmakersUseCase,
 	}
 
 	dressmakerController := controllers.NewDressmakerController(dressMakerRepository, dressMakerReviewsRepository, dressmakerUseCases)
@@ -57,7 +59,7 @@ func addDressmakerRoutes(db *sql.DB) {
 			Path:   "/dressmakers/reviews",
 			Method: "POST",
 			Auth:   true,
-			Func:  dressmakerController.AddDressmakerReview,
+			Func:   dressmakerController.AddDressmakerReview,
 		},
 	}
 
@@ -112,4 +114,3 @@ func addAuthRoutes(db *sql.DB) {
 
 	Routes = append(Routes, dressmakerAuthHandler, userAuthHandler)
 }
-

@@ -10,32 +10,35 @@ import (
 )
 
 type DressmakerController struct {
-	dressMakerRepository    database.DressmakerRepositoryInterface
-	dressMakerReviewsRepository database.DressmakerReviewsRepositoryInterface
-	createDressmakerUseCase *usecases.CreateDressMakerUseCase
-	updateDressmakerUseCase *usecases.UpdateDressMakerUseCase
+	dressMakerRepository             database.DressmakerRepositoryInterface
+	dressMakerReviewsRepository      database.DressmakerReviewsRepositoryInterface
+	createDressmakerUseCase          *usecases.CreateDressMakerUseCase
+	updateDressmakerUseCase          *usecases.UpdateDressMakerUseCase
 	getDressmakersByProximityUseCase *usecases.GetDressmakersByProximityUseCase
-	getDressmakersByServicesUseCase *usecases.GetDressmakersByServicesUseCase
-	addDressmakerReviewUseCase *usecases.AddDressmakerReviewUseCase
+	getDressmakersByServicesUseCase  *usecases.GetDressmakersByServicesUseCase
+	addDressmakerReviewUseCase       *usecases.AddDressmakerReviewUseCase
+	getDressmakersUseCase            *usecases.GetDressmakersUseCase
 }
 
 type DressmakerUseCasesInput struct {
-	CreateDressmakerUseCase *usecases.CreateDressMakerUseCase
-	UpdateDressmakerUseCase *usecases.UpdateDressMakerUseCase
+	CreateDressmakerUseCase          *usecases.CreateDressMakerUseCase
+	UpdateDressmakerUseCase          *usecases.UpdateDressMakerUseCase
 	GetDressmakersByProximityUseCase *usecases.GetDressmakersByProximityUseCase
-	GetDressmakersByServicesUseCase *usecases.GetDressmakersByServicesUseCase
-	AddDressmakerReviewUseCase *usecases.AddDressmakerReviewUseCase
+	GetDressmakersByServicesUseCase  *usecases.GetDressmakersByServicesUseCase
+	GetDressmakersUseCase            *usecases.GetDressmakersUseCase
+	AddDressmakerReviewUseCase       *usecases.AddDressmakerReviewUseCase
 }
 
 func NewDressmakerController(dmRepo database.DressmakerRepositoryInterface, dmrRepo database.DressmakerReviewsRepositoryInterface, usecases DressmakerUseCasesInput) *DressmakerController {
 	return &DressmakerController{
-		dressMakerRepository:    dmRepo,
-		dressMakerReviewsRepository: dmrRepo,
-		createDressmakerUseCase: usecases.CreateDressmakerUseCase,
-		updateDressmakerUseCase: usecases.UpdateDressmakerUseCase,
+		dressMakerRepository:             dmRepo,
+		dressMakerReviewsRepository:      dmrRepo,
+		createDressmakerUseCase:          usecases.CreateDressmakerUseCase,
+		updateDressmakerUseCase:          usecases.UpdateDressmakerUseCase,
 		getDressmakersByProximityUseCase: usecases.GetDressmakersByProximityUseCase,
-		getDressmakersByServicesUseCase: usecases.GetDressmakersByServicesUseCase,
-		addDressmakerReviewUseCase: usecases.AddDressmakerReviewUseCase,
+		getDressmakersByServicesUseCase:  usecases.GetDressmakersByServicesUseCase,
+		addDressmakerReviewUseCase:       usecases.AddDressmakerReviewUseCase,
+		getDressmakersUseCase:            usecases.GetDressmakersUseCase,
 	}
 }
 
@@ -84,80 +87,31 @@ func (dc *DressmakerController) UpdateDressmaker(c *gin.Context) {
 }
 
 func (dc *DressmakerController) GetDressmakers(c *gin.Context) {
-	searchBy := c.Query("search_by")
+	latitude := c.Query("latitude")
+	longitude := c.Query("longitude")
+	maxDistance := c.Query("max_distance")
+	services := c.Query("services")
 
-	if searchBy == "services"{
-		services := c.Query("services")
+	var input usecases.GetDressmakersInput
 
-		if services == "" {
-			c.JSON(400, gin.H{"error": "On search by services you must provide the services"})
-			return
-		}
-
-		var input usecases.GetDressmakersByServicesInput
-
+	switch {
+	case latitude != "" && longitude != "" && maxDistance != "":
+		input.Latitude, _ = strconv.ParseFloat(latitude, 64)
+		input.Longitude, _ = strconv.ParseFloat(longitude, 64)
+		input.Distance, _ = strconv.Atoi(maxDistance)
+	case services != "":
 		input.Services = services
+	default:
+		break
+	}
 
-		dressmakers, ucError := dc.getDressmakersByServicesUseCase.Execute(input)
-		if ucError.Message != "" {
-			c.JSON(ucError.Status, gin.H{"error": ucError.Message, "reason": ucError.Error})
-			return
-		}
-
-		c.JSON(200, gin.H{"data": dressmakers})
-
-		return
-	} else if searchBy == "proximity" {
-		println("GetDressmakersByProximity")
-
-		latitude := c.Query("latitude")
-		longitude := c.Query("longitude")
-		maxDistance := c.Query("max_distance")
-
-		if latitude == "" || longitude == "" {
-			c.JSON(400, gin.H{"error": "Latitude and Longitude are required"})
-			return
-		}
-
-		if maxDistance == "" {
-			c.JSON(400, gin.H{"error": "Max distance is required"})
-			return
-		}
-
-		var input usecases.GetDressmakersByProximityInput
-
-		normalizedLatitude, err := strconv.ParseFloat(latitude, 64)
-		if err != nil {
-			c.JSON(400, gin.H{"error": "Latitude must be a float"})
-			return
-		}
-
-		normalizedLongitude, err := strconv.ParseFloat(longitude, 64)
-		if err != nil {
-			c.JSON(400, gin.H{"error": "Longitude must be a float"})
-			return
-		}
-
-		normalizedMaxDistance, err := strconv.Atoi(maxDistance)
-		if err != nil {
-			c.JSON(400, gin.H{"error": "Max distance must be an integer"})
-			return
-		}
-
-		input.Latitude = normalizedLatitude
-		input.Longitude = normalizedLongitude
-		input.Distance = normalizedMaxDistance
-
-		dressmakers, ucError := dc.getDressmakersByProximityUseCase.Execute(input)
-		if ucError.Message != "" {
-			c.JSON(ucError.Status, gin.H{"error": ucError.Message, "reason": ucError.Error})
-			return
-		}
-
-		c.JSON(200, gin.H{"data": dressmakers})
-
+	dressmakers, ucError := dc.getDressmakersUseCase.Execute(input)
+	if ucError.Message != "" {
+		c.JSON(ucError.Status, gin.H{"error": ucError.Message, "reason": ucError.Error})
 		return
 	}
+
+	c.JSON(200, gin.H{"data": dressmakers})
 }
 
 func (dc *DressmakerController) AddDressmakerReview(c *gin.Context) {

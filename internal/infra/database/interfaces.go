@@ -2,10 +2,20 @@ package database
 
 import "github.com/paulozy/costurai/internal/entity"
 
+type GetDressmakersParams struct {
+	Latitude  float64
+	Longitude float64
+	Distance  int
+	Services  string
+
+	Default bool
+}
+
 type DressmakerRepositoryInterface interface {
 	Create(dressmaker *entity.Dressmaker) error
 	FindByEmail(email string) (*entity.Dressmaker, error)
 	Exists(email string) (bool, error)
+	Find(searchParams GetDressmakersParams) ([]entity.Dressmaker, error)
 	FindByID(id string) (*entity.Dressmaker, error)
 	FindByProximity(latitude, longitude float64, maxDistance int) ([]entity.Dressmaker, error)
 	FindByServices(services string) ([]entity.Dressmaker, error)

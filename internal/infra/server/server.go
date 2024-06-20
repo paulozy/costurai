@@ -3,6 +3,8 @@ package server
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/paulozy/costurai/internal/infra/server/middlewares"
+
+	"github.com/gin-contrib/cors"
 )
 
 type Handler struct {
@@ -34,6 +36,14 @@ func (s *Server) AddHandlers() {
 }
 
 func (s *Server) Start() {
+	config := cors.DefaultConfig()
+	config.AllowAllOrigins = true
+	config.AllowMethods = []string{"POST", "GET", "PUT", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Type", "Authorization", "Accept", "User-Agent", "Cache-Control", "Pragma"}
+	config.ExposeHeaders = []string{"Content-Length"}
+
+	s.Router.Use(cors.New(config))
+
 	for _, h := range s.Handlers {
 		if h.Auth {
 			s.Router.Handle(h.Method, h.Path, middlewares.EnsureAuthenticated(), h.Func)
