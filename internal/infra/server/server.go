@@ -56,8 +56,8 @@ func (s *Server) Start() {
 
 	var address string
 
-	if s.Host == "" && s.Port == "" && s.Env == "production" {
-		address = ""
+	if s.Host == "" && s.Env == "production" {
+		address = "0.0.0.0:" + s.Port
 	} else {
 		address = s.Host + ":" + s.Port
 	}
