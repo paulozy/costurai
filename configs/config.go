@@ -13,6 +13,7 @@ type config struct {
 	WebHost      string `mapstructure:"WEB_HOST"`
 	JWTSecret    string `mapstructure:"JWT_SECRET"`
 	JWTExpiresIn int64  `mapstructure:"JWT_EXPIRES_IN"`
+	Env          string `mapstructure:"ENV"`
 }
 
 func LoadConfig(path string) (*config, error) {

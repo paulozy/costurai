@@ -21,7 +21,7 @@ func main() {
 
 	server.PopulateRoutes(db)
 
-	server := server.NewServer(configs.WebHost, configs.WebPort)
+	server := server.NewServer(configs.WebHost, configs.WebPort, configs.Env)
 	server.AddHandlers()
 	server.Start()
 }

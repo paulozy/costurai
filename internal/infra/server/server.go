@@ -17,14 +17,16 @@ type Handler struct {
 type Server struct {
 	Host     string
 	Port     string
+	Env      string
 	Router   *gin.Engine
 	Handlers []Handler
 }
 
-func NewServer(host, port string) *Server {
+func NewServer(host, port, env string) *Server {
 	server := &Server{
 		Host:   host,
 		Port:   port,
+		Env:    env,
 		Router: gin.Default(),
 	}
 
@@ -54,8 +56,8 @@ func (s *Server) Start() {
 
 	var address string
 
-	if s.Host == "" && s.Port == "" {
-		address = ":8080"
+	if s.Host == "" && s.Port == "" && s.Env == "production" {
+		address = ""
 	} else {
 		address = s.Host + ":" + s.Port
 	}
