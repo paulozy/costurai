@@ -52,5 +52,13 @@ func (s *Server) Start() {
 		}
 	}
 
-	s.Router.Run(s.Host + ":" + s.Port)
+	var address string
+
+	if s.Host == "" && s.Port == "" {
+		address = ":8080"
+	} else {
+		address = s.Host + ":" + s.Port
+	}
+
+	s.Router.Run(address)
 }
