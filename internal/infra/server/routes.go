@@ -26,14 +26,16 @@ func addDressmakerRoutes(db *sql.DB) {
 	getDressmakersByServicesUseCase := usecases.NewGetDressmakersByServicesUseCase(dressMakerRepository)
 	addDressmakerReviewUseCase := usecases.NewAddDressmakerReviewUseCase(dressMakerRepository, dressMakerReviewsRepository)
 	getDressmakersUseCase := usecases.NewGetDressmakersUseCase(dressMakerRepository)
+	getServicesUniqueAttributesUseCase := usecases.NewGetServicesUniqueAttributesUseCase(dressMakerRepository)
 
 	dressmakerUseCases := controllers.DressmakerUseCasesInput{
-		CreateDressmakerUseCase:          createDressmakerUseCase,
-		UpdateDressmakerUseCase:          updateDressmakerUseCase,
-		GetDressmakersByProximityUseCase: getDressmakersByProximityUseCase,
-		GetDressmakersByServicesUseCase:  getDressmakersByServicesUseCase,
-		AddDressmakerReviewUseCase:       addDressmakerReviewUseCase,
-		GetDressmakersUseCase:            getDressmakersUseCase,
+		CreateDressmakerUseCase:            createDressmakerUseCase,
+		UpdateDressmakerUseCase:            updateDressmakerUseCase,
+		GetDressmakersByProximityUseCase:   getDressmakersByProximityUseCase,
+		GetDressmakersByServicesUseCase:    getDressmakersByServicesUseCase,
+		AddDressmakerReviewUseCase:         addDressmakerReviewUseCase,
+		GetDressmakersUseCase:              getDressmakersUseCase,
+		GetServicesUniqueAttributesUseCase: getServicesUniqueAttributesUseCase,
 	}
 
 	dressmakerController := controllers.NewDressmakerController(dressMakerRepository, dressMakerReviewsRepository, dressmakerUseCases)
@@ -60,6 +62,12 @@ func addDressmakerRoutes(db *sql.DB) {
 			Method: "POST",
 			Auth:   true,
 			Func:   dressmakerController.AddDressmakerReview,
+		},
+		{
+			Path:   "/dressmakers/services",
+			Method: "GET",
+			Auth:   false,
+			Func:   dressmakerController.GetServicesUniqueAttributes,
 		},
 	}
 

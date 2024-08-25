@@ -458,6 +458,42 @@ func (r *DressmakerRepository) Update(dressmaker *entity.Dressmaker) error {
 	return err
 }
 
+func (r *DressmakerRepository) GetServices() ([]string, error) {
+	uniqueServicesMap := make(map[string]bool)
+	var servicesUniqueAttr []string
+
+	rows, err := r.DB.Query(`
+		SELECT 
+			services
+		FROM dressmakers
+	`)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var services string
+
+		err := rows.Scan(
+			&services,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		splitedServices := strings.Split(services, ",")
+		for _, service := range splitedServices {
+			if _, found := uniqueServicesMap[service]; !found {
+				uniqueServicesMap[service] = true
+				servicesUniqueAttr = append(servicesUniqueAttr, service)
+			}
+		}
+
+	}
+
+	return servicesUniqueAttr, nil
+}
+
 func generateILikeQuery(keywords []string) string {
 	baseQuery := `
         SELECT

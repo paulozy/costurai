@@ -20,6 +20,7 @@ type DressmakerRepositoryInterface interface {
 	FindByProximity(latitude, longitude float64, maxDistance int) ([]entity.Dressmaker, error)
 	FindByServices(services string) ([]entity.Dressmaker, error)
 	Update(dressmaker *entity.Dressmaker) error
+	GetServices() ([]string, error)
 }
 
 type UserRepositoryInterface interface {
