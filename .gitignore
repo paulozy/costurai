@@ -1,2 +1,4 @@
 .env
 cmd/main
+bin
+tmp
