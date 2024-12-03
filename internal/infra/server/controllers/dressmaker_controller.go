@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"log"
-	"strconv"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/paulozy/costurai/internal/infra/database"
@@ -90,22 +90,11 @@ func (dc *DressmakerController) UpdateDressmaker(c *gin.Context) {
 }
 
 func (dc *DressmakerController) GetDressmakers(c *gin.Context) {
-	latitude := c.Query("latitude")
-	longitude := c.Query("longitude")
-	maxDistance := c.Query("max_distance")
-	services := c.Query("services")
-
 	var input usecases.GetDressmakersInput
 
-	switch {
-	case latitude != "" && longitude != "" && maxDistance != "":
-		input.Latitude, _ = strconv.ParseFloat(latitude, 64)
-		input.Longitude, _ = strconv.ParseFloat(longitude, 64)
-		input.Distance, _ = strconv.Atoi(maxDistance)
-	case services != "":
-		input.Services = services
-	default:
-		break
+	if err := c.ShouldBindQuery(&input); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
 	}
 
 	dressmakers, ucError := dc.getDressmakersUseCase.Execute(input)
@@ -114,7 +103,7 @@ func (dc *DressmakerController) GetDressmakers(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, gin.H{"data": dressmakers})
+	c.JSON(200, gin.H{"items": dressmakers.Items, "pagination": dressmakers.PaginationInfo})
 }
 
 func (dc *DressmakerController) AddDressmakerReview(c *gin.Context) {

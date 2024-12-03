@@ -7,6 +7,8 @@ type GetDressmakersParams struct {
 	Longitude float64
 	Distance  int
 	Services  string
+	Limit     int64
+	Page      int64
 
 	Default bool
 }

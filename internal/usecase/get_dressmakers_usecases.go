@@ -6,6 +6,7 @@ import (
 	"github.com/paulozy/costurai/internal/entity"
 	"github.com/paulozy/costurai/internal/infra/database"
 	"github.com/paulozy/costurai/pkg"
+	"github.com/paulozy/costurai/pkg/paginator"
 )
 
 type GetDressmakersUseCase struct {
@@ -19,26 +20,35 @@ func NewGetDressmakersUseCase(repo database.DressmakerRepositoryInterface) *GetD
 }
 
 type GetDressmakersInput struct {
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
-	Distance  int     `json:"distance"`
+	Latitude  float64 `form:"latitude"`
+	Longitude float64 `form:"longitude"`
+	Distance  int     `form:"distance" binding:"omitempty,numeric,min=1"`
 
-	Services string `json:"services"`
+	Services string `form:"services"`
+
+	Limit int64 `form:"limit" binding:"omitempty,numeric,min=1" default:"10"`
+	Page  int64 `form:"page" binding:"omitempty,numeric,min=1" default:"1"`
 }
 
-func (useCase *GetDressmakersUseCase) Execute(input GetDressmakersInput) ([]entity.Dressmaker, pkg.Error) {
+type GetDressmakersByProximityOuput struct {
+	*paginator.Paginate[entity.Dressmaker]
+}
+
+func (useCase *GetDressmakersUseCase) Execute(payload GetDressmakersInput) (*GetDressmakersByProximityOuput, pkg.Error) {
+	fmt.Println(payload)
+
 	var searchParams database.GetDressmakersParams
 
 	switch {
-	case input.Services != "":
+	case payload.Services != "":
 		searchParams = database.GetDressmakersParams{
-			Services: input.Services,
+			Services: payload.Services,
 		}
-	case input.Latitude != 0 && input.Longitude != 0 && input.Distance != 0:
+	case payload.Latitude != 0 && payload.Longitude != 0 && payload.Distance != 0:
 		searchParams = database.GetDressmakersParams{
-			Latitude:  input.Latitude,
-			Longitude: input.Longitude,
-			Distance:  input.Distance,
+			Latitude:  payload.Latitude,
+			Longitude: payload.Longitude,
+			Distance:  payload.Distance,
 		}
 	default:
 		searchParams = database.GetDressmakersParams{
@@ -46,12 +56,20 @@ func (useCase *GetDressmakersUseCase) Execute(input GetDressmakersInput) ([]enti
 		}
 	}
 
-	fmt.Println(searchParams)
-
 	dressmakers, err := useCase.DressMakerRepository.Find(searchParams)
 	if err != nil {
 		return nil, pkg.NewInternalServerError(err)
 	}
 
-	return dressmakers, pkg.Error{}
+	offset := paginator.GetOffset(payload.Limit, payload.Page, dressmakers)
+	paginatedItems := dressmakers[offset.Start:offset.End]
+
+	response := &GetDressmakersByProximityOuput{
+		Paginate: &paginator.Paginate[entity.Dressmaker]{
+			Items:          &paginatedItems,
+			PaginationInfo: paginator.NewPaginatation(payload.Limit, payload.Page, int64(len(dressmakers))),
+		},
+	}
+
+	return response, pkg.Error{}
 }
