@@ -97,6 +97,14 @@ func (dc *DressmakerController) GetDressmakers(c *gin.Context) {
 		return
 	}
 
+	if input.Limit == 0 {
+		input.Limit = 10
+	}
+
+	if input.Page == 0 {
+		input.Page = 1
+	}
+
 	dressmakers, ucError := dc.getDressmakersUseCase.Execute(input)
 	if ucError.Message != "" {
 		c.JSON(ucError.Status, gin.H{"error": ucError.Message, "reason": ucError.Error})

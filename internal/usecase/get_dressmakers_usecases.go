@@ -1,8 +1,6 @@
 package usecases
 
 import (
-	"fmt"
-
 	"github.com/paulozy/costurai/internal/entity"
 	"github.com/paulozy/costurai/internal/infra/database"
 	"github.com/paulozy/costurai/pkg"
@@ -22,12 +20,12 @@ func NewGetDressmakersUseCase(repo database.DressmakerRepositoryInterface) *GetD
 type GetDressmakersInput struct {
 	Latitude  float64 `form:"latitude"`
 	Longitude float64 `form:"longitude"`
-	Distance  int     `form:"distance" binding:"omitempty,numeric,min=1"`
+	Distance  int     `form:"max_distance"`
 
 	Services string `form:"services"`
 
-	Limit int64 `form:"limit" binding:"omitempty,numeric,min=1" default:"10"`
-	Page  int64 `form:"page" binding:"omitempty,numeric,min=1" default:"1"`
+	Limit int64 `form:"limit"`
+	Page  int64 `form:"page"`
 }
 
 type GetDressmakersByProximityOuput struct {
@@ -35,8 +33,6 @@ type GetDressmakersByProximityOuput struct {
 }
 
 func (useCase *GetDressmakersUseCase) Execute(payload GetDressmakersInput) (*GetDressmakersByProximityOuput, pkg.Error) {
-	fmt.Println(payload)
-
 	var searchParams database.GetDressmakersParams
 
 	switch {
