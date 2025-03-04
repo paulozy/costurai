@@ -4,12 +4,16 @@ import (
 	"github.com/paulozy/costurai/internal/entity"
 	"github.com/paulozy/costurai/internal/infra/database"
 	"github.com/paulozy/costurai/pkg"
+	"github.com/paulozy/costurai/pkg/paginator"
 )
 
 type GetDressmakersByProximityInput struct {
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
-	Distance  int     `json:"distance"`
+	Latitude  float64 `form:"latitude"`
+	Longitude float64 `form:"longitude"`
+	Distance  int     `form:"distance"`
+
+	Limit int64 `form:"limit"`
+	Page  int64 `form:"page"`
 }
 
 type GetDressmakersByProximityUseCase struct {
@@ -22,12 +26,26 @@ func NewGetDressmakersByProximityUseCase(repo database.DressmakerRepositoryInter
 	}
 }
 
-func (useCase *GetDressmakersByProximityUseCase) Execute(data GetDressmakersByProximityInput) ([]entity.Dressmaker, pkg.Error) {
+type GetDressmakersByProximityOuput struct {
+	*paginator.Paginate[entity.Dressmaker]
+}
+
+func (useCase *GetDressmakersByProximityUseCase) Execute(data GetDressmakersByProximityInput) (*GetDressmakersByProximityOuput, pkg.Error) {
 	dressmakers, err := useCase.DressMakerRepository.FindByProximity(data.Latitude, data.Longitude, data.Distance)
 
 	if err != nil {
 		return nil, pkg.NewInternalServerError(err)
 	}
 
-	return dressmakers, pkg.Error{}
+	offset := paginator.GetOffset(data.Limit, data.Page, dressmakers)
+	paginatedItems := dressmakers[offset.Start:offset.End]
+
+	response := &GetDressmakersByProximityOuput{
+		Paginate: &paginator.Paginate[entity.Dressmaker]{
+			Items:          &paginatedItems,
+			PaginationInfo: paginator.NewPaginatation(data.Limit, data.Page, int64(len(dressmakers))),
+		},
+	}
+
+	return response, pkg.Error{}
 }
