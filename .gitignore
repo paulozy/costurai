@@ -2,3 +2,5 @@
 cmd/main
 bin
 tmp
+
+credentials.json

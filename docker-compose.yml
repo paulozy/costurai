@@ -2,21 +2,12 @@ version: '3.8'
 
 services:
   app:
-    build: .
+    build:
+      context: .
+      target: production
     ports:
-      - "3000:3000"
-
-  db:
-    image: postgis/postgis
-    ports:
-      - "5432:5432"
+      - '3000:3000'
     environment:
-      POSTGRES_USER: costurai
-      POSTGRES_PASSWORD: costurai
-      POSTGRES_DB: costurai
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/credentials.json
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./scripts/database/01-init.sql:/docker-entrypoint-initdb.d/database/01-init.sql
-
-volumes:
-  postgres_data:
+      - ./credentials.json:/app/credentials.json

@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      target: builder
+    volumes:
+      - .:/app
+      - ./credentials.json:/app/credentials.json
+    command: ['go', 'run', 'cmd/main.go']
