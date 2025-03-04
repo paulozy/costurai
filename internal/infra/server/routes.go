@@ -1,44 +1,38 @@
 package server
 
 import (
-	"database/sql"
-
-	"github.com/paulozy/costurai/internal/infra/database"
+	"cloud.google.com/go/firestore"
+	"github.com/paulozy/costurai/internal/infra/database/firestore/repositories"
 	"github.com/paulozy/costurai/internal/infra/server/controllers"
 	usecases "github.com/paulozy/costurai/internal/usecase"
 )
 
 var Routes = []Handler{}
 
-func PopulateRoutes(db *sql.DB) []Handler {
+func PopulateRoutes(db *firestore.Client) []Handler {
 	addDressmakerRoutes(db)
 	addUserRoutes(db)
 	addAuthRoutes(db)
 	return Routes
 }
 
-func addDressmakerRoutes(db *sql.DB) {
-	dressMakerRepository := database.NewDressmakerRepository(db)
-	dressMakerReviewsRepository := database.NewDressmakerReviewsRepository(db)
+func addDressmakerRoutes(db *firestore.Client) {
+	dressMakerRepository := repositories.NewFirestoreDressmakerRepository(db)
+	dressMakerReviewsRepository := repositories.NewFirestoreReviewsRepository(db)
+
 	createDressmakerUseCase := usecases.NewCreateDressMakerUseCase(dressMakerRepository)
 	updateDressmakerUseCase := usecases.NewUpdateDressMakerUseCase(dressMakerRepository)
 	getDressmakersByProximityUseCase := usecases.NewGetDressmakersByProximityUseCase(dressMakerRepository)
-	getDressmakersByServicesUseCase := usecases.NewGetDressmakersByServicesUseCase(dressMakerRepository)
 	addDressmakerReviewUseCase := usecases.NewAddDressmakerReviewUseCase(dressMakerRepository, dressMakerReviewsRepository)
-	getDressmakersUseCase := usecases.NewGetDressmakersUseCase(dressMakerRepository)
-	getServicesUniqueAttributesUseCase := usecases.NewGetServicesUniqueAttributesUseCase(dressMakerRepository)
 
 	dressmakerUseCases := controllers.DressmakerUseCasesInput{
-		CreateDressmakerUseCase:            createDressmakerUseCase,
-		UpdateDressmakerUseCase:            updateDressmakerUseCase,
-		GetDressmakersByProximityUseCase:   getDressmakersByProximityUseCase,
-		GetDressmakersByServicesUseCase:    getDressmakersByServicesUseCase,
-		AddDressmakerReviewUseCase:         addDressmakerReviewUseCase,
-		GetDressmakersUseCase:              getDressmakersUseCase,
-		GetServicesUniqueAttributesUseCase: getServicesUniqueAttributesUseCase,
+		CreateDressmakerUseCase:          createDressmakerUseCase,
+		UpdateDressmakerUseCase:          updateDressmakerUseCase,
+		GetDressmakersByProximityUseCase: getDressmakersByProximityUseCase,
+		AddDressmakerReviewUseCase:       addDressmakerReviewUseCase,
 	}
 
-	dressmakerController := controllers.NewDressmakerController(dressMakerRepository, dressMakerReviewsRepository, dressmakerUseCases)
+	dressmakerController := controllers.NewDressmakerController(dressMakerRepository, nil, dressmakerUseCases)
 
 	dressmakerControllerRoutes := []Handler{
 		{
@@ -63,19 +57,14 @@ func addDressmakerRoutes(db *sql.DB) {
 			Auth:   true,
 			Func:   dressmakerController.AddDressmakerReview,
 		},
-		{
-			Path:   "/dressmakers/services",
-			Method: "GET",
-			Auth:   false,
-			Func:   dressmakerController.GetServicesUniqueAttributes,
-		},
 	}
 
 	Routes = append(Routes, dressmakerControllerRoutes...)
 }
 
-func addUserRoutes(db *sql.DB) {
-	userRepository := database.NewUserRepository(db)
+func addUserRoutes(db *firestore.Client) {
+	userRepository := repositories.NewFirestoreUserRepository(db)
+
 	createUserUseCase := usecases.NewCreateUserUseCase(userRepository)
 
 	userUseCases := controllers.UserUseCasesInput{
@@ -95,9 +84,9 @@ func addUserRoutes(db *sql.DB) {
 	Routes = append(Routes, userControllerRoutes...)
 }
 
-func addAuthRoutes(db *sql.DB) {
-	dressMakerRepository := database.NewDressmakerRepository(db)
-	userRepository := database.NewUserRepository(db)
+func addAuthRoutes(db *firestore.Client) {
+	dressMakerRepository := repositories.NewFirestoreDressmakerRepository(db)
+	userRepository := repositories.NewFirestoreUserRepository(db)
 
 	repositories := usecases.NewAuthenticationUseCaseInput{
 		DressMakerRepository: dressMakerRepository,

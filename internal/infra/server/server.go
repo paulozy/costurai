@@ -1,6 +1,7 @@
 package server
 
 import (
+	"cloud.google.com/go/firestore"
 	"github.com/gin-gonic/gin"
 	"github.com/paulozy/costurai/internal/infra/server/middlewares"
 
@@ -15,11 +16,12 @@ type Handler struct {
 }
 
 type Server struct {
-	Host     string
-	Port     string
-	Env      string
-	Router   *gin.Engine
-	Handlers []Handler
+	Host        string
+	Port        string
+	Env         string
+	Router      *gin.Engine
+	FirestoreDB *firestore.Client
+	Handlers    []Handler
 }
 
 func NewServer(host, port, env string) *Server {
@@ -34,6 +36,7 @@ func NewServer(host, port, env string) *Server {
 }
 
 func (s *Server) AddHandlers() {
+	PopulateRoutes(s.FirestoreDB)
 	s.Handlers = append(s.Handlers, Routes...)
 }
 

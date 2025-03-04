@@ -13,14 +13,14 @@ type Dressmaker struct {
 	Email    string `json:"email"`
 	Password string `json:"-"`
 
-	Name      string   `json:"name"`
-	Contact   string   `json:"contact"`
-	Location  Location `json:"location"`
-	Services  []string `json:"services"`
-	Grade     float64  `json:"grade"`
-	Reviews   []Review `json:"reviews"`
-	CreatedAt string   `json:"created_at"`
-	UpdatedAt string   `json:"updated_at"`
+	Name      string    `json:"name"`
+	Contact   string    `json:"contact"`
+	Location  Location  `json:"location"`
+	Services  []string  `json:"services"`
+	Grade     float64   `json:"grade"`
+	Reviews   []Review  `json:"reviews"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func NewDressmaker(email, password, name, contact string, location Location, services []string) (*Dressmaker, error) {
@@ -39,8 +39,8 @@ func NewDressmaker(email, password, name, contact string, location Location, ser
 		Services:  services,
 		Grade:     0,
 		Reviews:   []Review{},
-		CreatedAt: time.Now().Format(time.RFC3339),
-		UpdatedAt: time.Now().Format(time.RFC3339),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
 	}
 
 	return dressmaker, nil
@@ -64,7 +64,7 @@ func (dressmaker *Dressmaker) UpdateDressmaker(name, contact string, location Lo
 	dressmaker.Contact = contact
 	dressmaker.Location = location
 	dressmaker.Services = services
-	dressmaker.UpdatedAt = time.Now().Format(time.RFC3339)
+	dressmaker.UpdatedAt = time.Now()
 }
 
 func (dressmaker *Dressmaker) calculateGrade() float64 {
@@ -77,5 +77,5 @@ func (dressmaker *Dressmaker) calculateGrade() float64 {
 		totalGrade += review.Grade
 	}
 
-	return math.Round(totalGrade/float64(len(dressmaker.Reviews)))
+	return math.Round(totalGrade / float64(len(dressmaker.Reviews)))
 }

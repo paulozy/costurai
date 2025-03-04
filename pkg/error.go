@@ -31,8 +31,9 @@ func NewBadRequestError(err error) Error {
 
 func NewEntityAlreadyExistsError(entity string) Error {
 	return Error{
-		Message: entity + " already exists",
+		Message: "Unprocessable entity",
 		Status:  409,
+		Error:   entity + " already exists!",
 	}
 }
 
