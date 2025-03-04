@@ -1,4 +1,4 @@
-package database
+package repositories
 
 import (
 	"database/sql"
@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/paulozy/costurai/internal/entity"
+	"github.com/paulozy/costurai/internal/infra/database"
 )
 
 type DressmakerRepository struct {
@@ -106,7 +107,7 @@ func (r *DressmakerRepository) Exists(email string) (bool, error) {
 	return exists, nil
 }
 
-func (r *DressmakerRepository) Find(searchParams GetDressmakersParams) ([]entity.Dressmaker, error) {
+func (r *DressmakerRepository) Find(searchParams database.GetDressmakersParams) ([]entity.Dressmaker, error) {
 	var dressmakers []entity.Dressmaker
 
 	var stmt *sql.Stmt

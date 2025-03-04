@@ -1,4 +1,4 @@
-package database
+package repositories
 
 import (
 	"database/sql"
@@ -9,7 +9,6 @@ import (
 type DressmakerReviewsRepository struct {
 	DB *sql.DB
 }
-
 
 func NewDressmakerReviewsRepository(db *sql.DB) *DressmakerReviewsRepository {
 	return &DressmakerReviewsRepository{

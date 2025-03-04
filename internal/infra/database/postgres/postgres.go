@@ -1,13 +1,11 @@
-package database
+package postgres
 
 import (
 	"database/sql"
 	"log"
-
-	_ "github.com/lib/pq"
 )
 
-func NewDatabaseConn(dsn string) *sql.DB {
+func NewPostgresClient(dsn string) *sql.DB {
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
 		log.Panic("Error opening database connection", err)
