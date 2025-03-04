@@ -10,38 +10,29 @@ import (
 )
 
 type DressmakerController struct {
-	dressMakerRepository               database.DressmakerRepositoryInterface
-	dressMakerReviewsRepository        database.DressmakerReviewsRepositoryInterface
-	createDressmakerUseCase            *usecases.CreateDressMakerUseCase
-	updateDressmakerUseCase            *usecases.UpdateDressMakerUseCase
-	getDressmakersByProximityUseCase   *usecases.GetDressmakersByProximityUseCase
-	getDressmakersByServicesUseCase    *usecases.GetDressmakersByServicesUseCase
-	addDressmakerReviewUseCase         *usecases.AddDressmakerReviewUseCase
-	getDressmakersUseCase              *usecases.GetDressmakersUseCase
-	getServicesUniqueAttributesUseCase *usecases.GetServicesUniqueAttributesUseCase
+	dressMakerRepository             database.DressmakerRepositoryInterface
+	dressMakerReviewsRepository      database.DressmakerReviewsRepositoryInterface
+	createDressmakerUseCase          *usecases.CreateDressMakerUseCase
+	updateDressmakerUseCase          *usecases.UpdateDressMakerUseCase
+	getDressmakersByProximityUseCase *usecases.GetDressmakersByProximityUseCase
+	addDressmakerReviewUseCase       *usecases.AddDressmakerReviewUseCase
 }
 
 type DressmakerUseCasesInput struct {
-	CreateDressmakerUseCase            *usecases.CreateDressMakerUseCase
-	UpdateDressmakerUseCase            *usecases.UpdateDressMakerUseCase
-	GetDressmakersByProximityUseCase   *usecases.GetDressmakersByProximityUseCase
-	GetDressmakersByServicesUseCase    *usecases.GetDressmakersByServicesUseCase
-	GetDressmakersUseCase              *usecases.GetDressmakersUseCase
-	AddDressmakerReviewUseCase         *usecases.AddDressmakerReviewUseCase
-	GetServicesUniqueAttributesUseCase *usecases.GetServicesUniqueAttributesUseCase
+	CreateDressmakerUseCase          *usecases.CreateDressMakerUseCase
+	UpdateDressmakerUseCase          *usecases.UpdateDressMakerUseCase
+	GetDressmakersByProximityUseCase *usecases.GetDressmakersByProximityUseCase
+	AddDressmakerReviewUseCase       *usecases.AddDressmakerReviewUseCase
 }
 
 func NewDressmakerController(dmRepo database.DressmakerRepositoryInterface, dmrRepo database.DressmakerReviewsRepositoryInterface, usecases DressmakerUseCasesInput) *DressmakerController {
 	return &DressmakerController{
-		dressMakerRepository:               dmRepo,
-		dressMakerReviewsRepository:        dmrRepo,
-		createDressmakerUseCase:            usecases.CreateDressmakerUseCase,
-		updateDressmakerUseCase:            usecases.UpdateDressmakerUseCase,
-		getDressmakersByProximityUseCase:   usecases.GetDressmakersByProximityUseCase,
-		getDressmakersByServicesUseCase:    usecases.GetDressmakersByServicesUseCase,
-		addDressmakerReviewUseCase:         usecases.AddDressmakerReviewUseCase,
-		getDressmakersUseCase:              usecases.GetDressmakersUseCase,
-		getServicesUniqueAttributesUseCase: usecases.GetServicesUniqueAttributesUseCase,
+		dressMakerRepository:             dmRepo,
+		dressMakerReviewsRepository:      dmrRepo,
+		createDressmakerUseCase:          usecases.CreateDressmakerUseCase,
+		updateDressmakerUseCase:          usecases.UpdateDressmakerUseCase,
+		getDressmakersByProximityUseCase: usecases.GetDressmakersByProximityUseCase,
+		addDressmakerReviewUseCase:       usecases.AddDressmakerReviewUseCase,
 	}
 }
 
@@ -90,7 +81,7 @@ func (dc *DressmakerController) UpdateDressmaker(c *gin.Context) {
 }
 
 func (dc *DressmakerController) GetDressmakers(c *gin.Context) {
-	var input usecases.GetDressmakersInput
+	var input usecases.GetDressmakersByProximityInput
 
 	if err := c.ShouldBindQuery(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -105,7 +96,7 @@ func (dc *DressmakerController) GetDressmakers(c *gin.Context) {
 		input.Page = 1
 	}
 
-	dressmakers, ucError := dc.getDressmakersUseCase.Execute(input)
+	dressmakers, ucError := dc.getDressmakersByProximityUseCase.Execute(input)
 	if ucError.Message != "" {
 		c.JSON(ucError.Status, gin.H{"error": ucError.Message, "reason": ucError.Error})
 		return
@@ -132,14 +123,4 @@ func (dc *DressmakerController) AddDressmakerReview(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{"data": dressmaker})
-}
-
-func (dc *DressmakerController) GetServicesUniqueAttributes(c *gin.Context) {
-	services, ucError := dc.getServicesUniqueAttributesUseCase.Execute()
-	if ucError.Message != "" {
-		c.JSON(ucError.Status, gin.H{"error": ucError.Message, "reason": ucError.Error})
-		return
-	}
-
-	c.JSON(200, gin.H{"data": services})
 }
