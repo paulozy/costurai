@@ -7,20 +7,20 @@ import (
 )
 
 type AddDressmakerReviewUseCase struct {
-	DressmakerRepository database.DressmakerRepositoryInterface
+	DressmakerRepository        database.DressmakerRepositoryInterface
 	DressmakerReviewsRepository database.DressmakerReviewsRepositoryInterface
 }
 
 type AddDressmakerReviewUseCaseInput struct {
-	DressmakerID string `json:"dressmaker_id"`
-	UserID			 string `json:"user_id"`
-	Comment			string `json:"comment"`
-	Grade				float64 `json:"grade"`
+	DressmakerID string  `json:"dressmaker_id"`
+	UserID       string  `json:"user_id"`
+	Comment      string  `json:"comment"`
+	Grade        float64 `json:"grade"`
 }
 
 func NewAddDressmakerReviewUseCase(dmRepo database.DressmakerRepositoryInterface, dmrRepo database.DressmakerReviewsRepositoryInterface) *AddDressmakerReviewUseCase {
 	return &AddDressmakerReviewUseCase{
-		DressmakerRepository: dmRepo,
+		DressmakerRepository:        dmRepo,
 		DressmakerReviewsRepository: dmrRepo,
 	}
 }
@@ -73,7 +73,7 @@ func validateNewReviewInput(input AddDressmakerReviewUseCaseInput) pkg.Error {
 	if input.Grade < 1 || input.Grade > 5 {
 		return pkg.Error{
 			Message: "grade must be between 1 and 5",
-			Status: 400,
+			Status:  400,
 		}
 	}
 
