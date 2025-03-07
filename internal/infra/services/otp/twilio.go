@@ -58,13 +58,9 @@ func (ts *TwilioService) SendVerification(phone string) (*OTPServiceSendVerifica
 }
 
 func (ts *TwilioService) Verify(code, phone string) (*OTPServiceVerifyOutput, error) {
-	fmt.Println("code: %s, phone: %s", code, phone)
-
 	params := &verify.CreateVerificationCheckParams{}
 	params.SetTo(phone)
 	params.SetCode(code)
-
-	fmt.Println(*params.Code, *params.To)
 
 	res, err := ts.Client.VerifyV2.CreateVerificationCheck(
 		ts.ServiceID,
