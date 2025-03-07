@@ -2,11 +2,8 @@ package server
 
 import (
 	"cloud.google.com/go/firestore"
-	"github.com/paulozy/costurai/internal/infra/database/firestore/repositories"
-	"github.com/paulozy/costurai/internal/infra/server/controllers"
+	"github.com/paulozy/costurai/internal/infra/server/factories"
 	sInterfaces "github.com/paulozy/costurai/internal/infra/server/interfaces"
-	services "github.com/paulozy/costurai/internal/infra/services/otp"
-	usecases "github.com/paulozy/costurai/internal/usecase"
 )
 
 type PopulateRoutesInput struct {
@@ -24,30 +21,7 @@ func PopulateRoutes(input PopulateRoutesInput) []Handler {
 }
 
 func addDressmakerRoutes(db *firestore.Client, twilioCfg sInterfaces.TwilioConfig) {
-	dressMakerRepository := repositories.NewFirestoreDressmakerRepository(db)
-	dressMakerReviewsRepository := repositories.NewFirestoreReviewsRepository(db)
-
-	twilioOtpService := services.NewTwilioService(
-		twilioCfg.TwilioAccountSID,
-		twilioCfg.TwilioAuthToken,
-		twilioCfg.TwilioSMSSID,
-	)
-
-	createDressmakerUseCase := usecases.NewCreateDressMakerUseCase(dressMakerRepository)
-	enableDresskamerUseCase := usecases.NewEnableDressmakerUseCase(dressMakerRepository, twilioOtpService)
-	updateDressmakerUseCase := usecases.NewUpdateDressMakerUseCase(dressMakerRepository)
-	getDressmakersByProximityUseCase := usecases.NewGetDressmakersByProximityUseCase(dressMakerRepository)
-	addDressmakerReviewUseCase := usecases.NewAddDressmakerReviewUseCase(dressMakerRepository, dressMakerReviewsRepository)
-
-	dressmakerUseCases := controllers.DressmakerUseCasesInput{
-		CreateDressmakerUseCase:          createDressmakerUseCase,
-		UpdateDressmakerUseCase:          updateDressmakerUseCase,
-		GetDressmakersByProximityUseCase: getDressmakersByProximityUseCase,
-		AddDressmakerReviewUseCase:       addDressmakerReviewUseCase,
-		EnableDressmakerUseCase:          enableDresskamerUseCase,
-	}
-
-	dressmakerController := controllers.NewDressmakerController(dressMakerRepository, dressMakerReviewsRepository, dressmakerUseCases)
+	dressmakerController := factories.DressmakerControllerFactory(db, twilioCfg)
 
 	dressmakerControllerRoutes := []Handler{
 		{
@@ -84,15 +58,7 @@ func addDressmakerRoutes(db *firestore.Client, twilioCfg sInterfaces.TwilioConfi
 }
 
 func addUserRoutes(db *firestore.Client) {
-	userRepository := repositories.NewFirestoreUserRepository(db)
-
-	createUserUseCase := usecases.NewCreateUserUseCase(userRepository)
-
-	userUseCases := controllers.UserUseCasesInput{
-		CreateUserUseCase: createUserUseCase,
-	}
-
-	userController := controllers.NewUserController(userRepository, userUseCases)
+	userController := factories.UserControllerFactory(db)
 
 	userControllerRoutes := []Handler{
 		{
@@ -106,17 +72,7 @@ func addUserRoutes(db *firestore.Client) {
 }
 
 func addAuthRoutes(db *firestore.Client) {
-	dressMakerRepository := repositories.NewFirestoreDressmakerRepository(db)
-	userRepository := repositories.NewFirestoreUserRepository(db)
-
-	repositories := usecases.NewAuthenticationUseCaseInput{
-		DressMakerRepository: dressMakerRepository,
-		UserRepository:       userRepository,
-	}
-
-	authenticationUseCase := usecases.NewDressMakerAuthenticationUseCase(repositories)
-
-	authController := controllers.NewAuthController(authenticationUseCase, dressMakerRepository)
+	authController := factories.AuthControllerFactory(db)
 
 	dressmakerAuthHandler := Handler{
 		Path:   "/dressmakers/auth",
