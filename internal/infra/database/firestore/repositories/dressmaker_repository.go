@@ -146,6 +146,7 @@ func (r *FirestoreDressmakerRepository) Update(dressmaker *entity.Dressmaker) er
 			"Latitude":  dressmaker.Location.Latitude,
 			"Longitude": dressmaker.Location.Longitude,
 		},
+		"Enabled":    dressmaker.Enabled,
 		"Reviews":    dressmaker.Reviews,
 		"Services":   dressmaker.Services,
 		"Grade":      dressmaker.Grade,

@@ -6,6 +6,7 @@ import (
 	"github.com/paulozy/costurai/configs"
 	"github.com/paulozy/costurai/internal/infra/database/firestore"
 	"github.com/paulozy/costurai/internal/infra/server"
+	sInterfaces "github.com/paulozy/costurai/internal/infra/server/interfaces"
 )
 
 const (
@@ -24,7 +25,14 @@ func main() {
 	database := firestore.NewFirestoreClient(configs.FirebaseProjectId)
 
 	server := server.NewServer(configs.WebHost, configs.WebPort, configs.Env)
+
 	server.FirestoreDB = database
+	server.TwilioCfg = sInterfaces.TwilioConfig{
+		TwilioAccountSID: configs.TwilioAccountSID,
+		TwilioSMSSID:     configs.TwilioSMSSID,
+		TwilioAuthToken:  configs.TwilioAuthToken,
+	}
+
 	server.AddHandlers()
 	server.Start()
 }

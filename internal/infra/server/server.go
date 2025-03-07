@@ -3,6 +3,7 @@ package server
 import (
 	"cloud.google.com/go/firestore"
 	"github.com/gin-gonic/gin"
+	sInterfaces "github.com/paulozy/costurai/internal/infra/server/interfaces"
 	"github.com/paulozy/costurai/internal/infra/server/middlewares"
 
 	"github.com/gin-contrib/cors"
@@ -21,6 +22,7 @@ type Server struct {
 	Env         string
 	Router      *gin.Engine
 	FirestoreDB *firestore.Client
+	TwilioCfg   sInterfaces.TwilioConfig
 	Handlers    []Handler
 }
 
@@ -36,7 +38,12 @@ func NewServer(host, port, env string) *Server {
 }
 
 func (s *Server) AddHandlers() {
-	PopulateRoutes(s.FirestoreDB)
+	populateRoutesInput := PopulateRoutesInput{
+		db:           s.FirestoreDB,
+		twilioConfig: s.TwilioCfg,
+	}
+
+	PopulateRoutes(populateRoutesInput)
 	s.Handlers = append(s.Handlers, Routes...)
 }
 

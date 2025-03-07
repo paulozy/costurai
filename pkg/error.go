@@ -29,6 +29,13 @@ func NewBadRequestError(err error) Error {
 	}
 }
 
+func NewInvalidOTPCode() Error {
+	return Error{
+		Message: "Invalid Code",
+		Status:  400,
+	}
+}
+
 func NewEntityAlreadyExistsError(entity string) Error {
 	return Error{
 		Message: "Unprocessable entity",

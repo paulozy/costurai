@@ -4,23 +4,37 @@ import (
 	"cloud.google.com/go/firestore"
 	"github.com/paulozy/costurai/internal/infra/database/firestore/repositories"
 	"github.com/paulozy/costurai/internal/infra/server/controllers"
+	sInterfaces "github.com/paulozy/costurai/internal/infra/server/interfaces"
+	services "github.com/paulozy/costurai/internal/infra/services/otp"
 	usecases "github.com/paulozy/costurai/internal/usecase"
 )
 
+type PopulateRoutesInput struct {
+	db           *firestore.Client
+	twilioConfig sInterfaces.TwilioConfig
+}
+
 var Routes = []Handler{}
 
-func PopulateRoutes(db *firestore.Client) []Handler {
-	addDressmakerRoutes(db)
-	addUserRoutes(db)
-	addAuthRoutes(db)
+func PopulateRoutes(input PopulateRoutesInput) []Handler {
+	addDressmakerRoutes(input.db, input.twilioConfig)
+	addUserRoutes(input.db)
+	addAuthRoutes(input.db)
 	return Routes
 }
 
-func addDressmakerRoutes(db *firestore.Client) {
+func addDressmakerRoutes(db *firestore.Client, twilioCfg sInterfaces.TwilioConfig) {
 	dressMakerRepository := repositories.NewFirestoreDressmakerRepository(db)
 	dressMakerReviewsRepository := repositories.NewFirestoreReviewsRepository(db)
 
+	twilioOtpService := services.NewTwilioService(
+		twilioCfg.TwilioAccountSID,
+		twilioCfg.TwilioAuthToken,
+		twilioCfg.TwilioSMSSID,
+	)
+
 	createDressmakerUseCase := usecases.NewCreateDressMakerUseCase(dressMakerRepository)
+	enableDresskamerUseCase := usecases.NewEnableDressmakerUseCase(dressMakerRepository, twilioOtpService)
 	updateDressmakerUseCase := usecases.NewUpdateDressMakerUseCase(dressMakerRepository)
 	getDressmakersByProximityUseCase := usecases.NewGetDressmakersByProximityUseCase(dressMakerRepository)
 	addDressmakerReviewUseCase := usecases.NewAddDressmakerReviewUseCase(dressMakerRepository, dressMakerReviewsRepository)
@@ -30,9 +44,10 @@ func addDressmakerRoutes(db *firestore.Client) {
 		UpdateDressmakerUseCase:          updateDressmakerUseCase,
 		GetDressmakersByProximityUseCase: getDressmakersByProximityUseCase,
 		AddDressmakerReviewUseCase:       addDressmakerReviewUseCase,
+		EnableDressmakerUseCase:          enableDresskamerUseCase,
 	}
 
-	dressmakerController := controllers.NewDressmakerController(dressMakerRepository, nil, dressmakerUseCases)
+	dressmakerController := controllers.NewDressmakerController(dressMakerRepository, dressMakerReviewsRepository, dressmakerUseCases)
 
 	dressmakerControllerRoutes := []Handler{
 		{
@@ -56,6 +71,12 @@ func addDressmakerRoutes(db *firestore.Client) {
 			Method: "POST",
 			Auth:   true,
 			Func:   dressmakerController.AddDressmakerReview,
+		},
+		{
+			Path:   "/dressmakers/:id/enable",
+			Method: "PUT",
+			Auth:   false,
+			Func:   dressmakerController.EnableDressmaker,
 		},
 	}
 

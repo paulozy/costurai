@@ -8,7 +8,9 @@ type config struct {
 	JWTSecret         string `mapstructure:"JWT_SECRET"`
 	JWTExpiresIn      int64  `mapstructure:"JWT_EXPIRES_IN"`
 	FirebaseProjectId string `mapstructure:"FIREBASE_PROJECT_ID"`
-	TWILIO_SID        string `mapstructure:"TWILIO_SID"`
+	TwilioAccountSID  string `mapstructure:"TWILIO_ACCOUNT_SID"`
+	TwilioSMSSID      string `mapstructure:"TWILIO_SMS_SID"`
+	TwilioAuthToken   string `mapstructure:"TWILIO_AUTH_TOKEN"`
 	Env               string `mapstructure:"ENV"`
 }
 
