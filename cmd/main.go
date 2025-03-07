@@ -9,11 +9,6 @@ import (
 	"github.com/paulozy/costurai/internal/infra/server/types"
 )
 
-const (
-	Firestore string = "firestore"
-	Postgres  string = "postgres"
-)
-
 func main() {
 	fmt.Println("Starting the Costurai API server...")
 
