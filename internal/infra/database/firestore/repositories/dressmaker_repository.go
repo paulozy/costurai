@@ -3,23 +3,32 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"log"
 
-	"cloud.google.com/go/firestore"
+	gfirestore "cloud.google.com/go/firestore"
 	"github.com/paulozy/costurai/internal/entity"
+	"github.com/paulozy/costurai/internal/infra/database"
+	"github.com/paulozy/costurai/internal/infra/database/firestore"
 	"github.com/paulozy/costurai/pkg"
 	"google.golang.org/api/iterator"
 )
 
 type FirestoreDressmakerRepository struct {
-	Dressmakers *firestore.CollectionRef
+	Dressmakers *gfirestore.CollectionRef
 	Ctx         *context.Context
+	DB          database.DatabaseInterface
 }
 
-func NewFirestoreDressmakerRepository(db *firestore.Client) *FirestoreDressmakerRepository {
+func NewFirestoreDressmakerRepository(db database.DatabaseInterface) *FirestoreDressmakerRepository {
 	ctx := context.Background()
 
+	firestoreDB, ok := db.(*firestore.FirestoreDatabase)
+	if !ok {
+		log.Panic("Expected *FirestoreDatabase, got different type")
+	}
+
 	return &FirestoreDressmakerRepository{
-		Dressmakers: db.Collection("dressmakers"),
+		Dressmakers: firestoreDB.Client.Collection("dressmakers"),
 		Ctx:         &ctx,
 	}
 }
@@ -151,7 +160,7 @@ func (r *FirestoreDressmakerRepository) Update(dressmaker *entity.Dressmaker) er
 		"Services":   dressmaker.Services,
 		"Grade":      dressmaker.Grade,
 		"Updated_at": dressmaker.UpdatedAt,
-	}, firestore.MergeAll)
+	}, gfirestore.MergeAll)
 
 	return err
 }

@@ -2,21 +2,29 @@ package repositories
 
 import (
 	"context"
+	"log"
 
-	"cloud.google.com/go/firestore"
+	gfirestore "cloud.google.com/go/firestore"
 	"github.com/paulozy/costurai/internal/entity"
+	"github.com/paulozy/costurai/internal/infra/database"
+	"github.com/paulozy/costurai/internal/infra/database/firestore"
 )
 
 type DressmakerReviewsRepository struct {
-	Reviews *firestore.CollectionRef
+	Reviews *gfirestore.CollectionRef
 	Ctx     *context.Context
 }
 
-func NewFirestoreReviewsRepository(db *firestore.Client) *DressmakerReviewsRepository {
+func NewFirestoreReviewsRepository(db database.DatabaseInterface) *DressmakerReviewsRepository {
 	ctx := context.Background()
 
+	firestoreDB, ok := db.(*firestore.FirestoreDatabase)
+	if !ok {
+		log.Panic("Expected *FirestoreDatabase, got different type")
+	}
+
 	return &DressmakerReviewsRepository{
-		Reviews: db.Collection("reviews"),
+		Reviews: firestoreDB.Client.Collection("reviews"),
 		Ctx:     &ctx,
 	}
 }

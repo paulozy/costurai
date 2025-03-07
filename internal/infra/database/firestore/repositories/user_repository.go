@@ -2,21 +2,29 @@ package repositories
 
 import (
 	"context"
+	"log"
 
-	"cloud.google.com/go/firestore"
+	gfirestore "cloud.google.com/go/firestore"
 	"github.com/paulozy/costurai/internal/entity"
+	"github.com/paulozy/costurai/internal/infra/database"
+	"github.com/paulozy/costurai/internal/infra/database/firestore"
 )
 
 type FirestoreUserRepository struct {
-	Users *firestore.CollectionRef
+	Users *gfirestore.CollectionRef
 	Ctx   *context.Context
 }
 
-func NewFirestoreUserRepository(db *firestore.Client) *FirestoreUserRepository {
+func NewFirestoreUserRepository(db database.DatabaseInterface) *FirestoreUserRepository {
 	ctx := context.Background()
 
+	firestoreDB, ok := db.(*firestore.FirestoreDatabase)
+	if !ok {
+		log.Panic("Expected *FirestoreDatabase, got different type")
+	}
+
 	return &FirestoreUserRepository{
-		Users: db.Collection("users"),
+		Users: firestoreDB.Client.Collection("users"),
 		Ctx:   &ctx,
 	}
 }
@@ -98,7 +106,7 @@ func (r *FirestoreUserRepository) Update(user *entity.User) error {
 			"Longitude": user.Location.Longitude,
 		},
 		"Updated_at": user.UpdatedAt,
-	}, firestore.MergeAll)
+	}, gfirestore.MergeAll)
 
 	return err
 }

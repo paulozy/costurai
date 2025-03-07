@@ -1,17 +1,17 @@
 package factories
 
 import (
-	"cloud.google.com/go/firestore"
+	"github.com/paulozy/costurai/internal/infra/database"
 	"github.com/paulozy/costurai/internal/infra/database/firestore/repositories"
 	"github.com/paulozy/costurai/internal/infra/server/controllers"
-	sInterfaces "github.com/paulozy/costurai/internal/infra/server/interfaces"
+	"github.com/paulozy/costurai/internal/infra/server/types"
 	services "github.com/paulozy/costurai/internal/infra/services/otp"
 	usecases "github.com/paulozy/costurai/internal/usecase"
 )
 
 func DressmakerControllerFactory(
-	databaseInstance *firestore.Client,
-	twilio sInterfaces.TwilioConfig,
+	databaseInstance database.DatabaseInterface,
+	twilio types.TwilioConfig,
 ) *controllers.DressmakerController {
 
 	dressMakerRepository := repositories.NewFirestoreDressmakerRepository(databaseInstance)

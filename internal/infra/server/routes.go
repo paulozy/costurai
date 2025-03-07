@@ -1,27 +1,31 @@
 package server
 
 import (
-	"cloud.google.com/go/firestore"
-	"github.com/paulozy/costurai/internal/infra/server/factories"
-	sInterfaces "github.com/paulozy/costurai/internal/infra/server/interfaces"
+	"github.com/paulozy/costurai/internal/infra/database"
+	"github.com/paulozy/costurai/internal/infra/factories"
+	"github.com/paulozy/costurai/internal/infra/server/types"
 )
-
-type PopulateRoutesInput struct {
-	db           *firestore.Client
-	twilioConfig sInterfaces.TwilioConfig
-}
 
 var Routes = []Handler{}
 
-func PopulateRoutes(input PopulateRoutesInput) []Handler {
-	addDressmakerRoutes(input.db, input.twilioConfig)
-	addUserRoutes(input.db)
-	addAuthRoutes(input.db)
+func PopulateRoutes(server Server) []Handler {
+	addDressmakerRoutes(
+		server.DatabaseInstance,
+		server.Twilio,
+	)
+	addUserRoutes(server.DatabaseInstance)
+	addAuthRoutes(server.DatabaseInstance)
 	return Routes
 }
 
-func addDressmakerRoutes(db *firestore.Client, twilioCfg sInterfaces.TwilioConfig) {
-	dressmakerController := factories.DressmakerControllerFactory(db, twilioCfg)
+func addDressmakerRoutes(
+	db database.DatabaseInterface,
+	twilio types.TwilioConfig,
+) {
+	dressmakerController := factories.DressmakerControllerFactory(
+		db,
+		twilio,
+	)
 
 	dressmakerControllerRoutes := []Handler{
 		{
@@ -57,7 +61,7 @@ func addDressmakerRoutes(db *firestore.Client, twilioCfg sInterfaces.TwilioConfi
 	Routes = append(Routes, dressmakerControllerRoutes...)
 }
 
-func addUserRoutes(db *firestore.Client) {
+func addUserRoutes(db database.DatabaseInterface) {
 	userController := factories.UserControllerFactory(db)
 
 	userControllerRoutes := []Handler{
@@ -71,7 +75,7 @@ func addUserRoutes(db *firestore.Client) {
 	Routes = append(Routes, userControllerRoutes...)
 }
 
-func addAuthRoutes(db *firestore.Client) {
+func addAuthRoutes(db database.DatabaseInterface) {
 	authController := factories.AuthControllerFactory(db)
 
 	dressmakerAuthHandler := Handler{

@@ -1,14 +1,14 @@
 package factories
 
 import (
-	"cloud.google.com/go/firestore"
+	"github.com/paulozy/costurai/internal/infra/database"
 	"github.com/paulozy/costurai/internal/infra/database/firestore/repositories"
 	"github.com/paulozy/costurai/internal/infra/server/controllers"
 	usecases "github.com/paulozy/costurai/internal/usecase"
 )
 
 func AuthControllerFactory(
-	databaseInstance *firestore.Client,
+	databaseInstance database.DatabaseInterface,
 ) *controllers.AuthController {
 	dressMakerRepository := repositories.NewFirestoreDressmakerRepository(databaseInstance)
 	userRepository := repositories.NewFirestoreUserRepository(databaseInstance)

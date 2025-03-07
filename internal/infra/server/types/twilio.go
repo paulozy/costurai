@@ -1,4 +1,4 @@
-package interfaces
+package types
 
 type TwilioConfig struct {
 	TwilioAccountSID string

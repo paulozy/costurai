@@ -1,10 +1,10 @@
 package server
 
 import (
-	"cloud.google.com/go/firestore"
 	"github.com/gin-gonic/gin"
-	sInterfaces "github.com/paulozy/costurai/internal/infra/server/interfaces"
+	"github.com/paulozy/costurai/internal/infra/database"
 	"github.com/paulozy/costurai/internal/infra/server/middlewares"
+	"github.com/paulozy/costurai/internal/infra/server/types"
 
 	"github.com/gin-contrib/cors"
 )
@@ -17,13 +17,13 @@ type Handler struct {
 }
 
 type Server struct {
-	Host        string
-	Port        string
-	Env         string
-	Router      *gin.Engine
-	FirestoreDB *firestore.Client
-	TwilioCfg   sInterfaces.TwilioConfig
-	Handlers    []Handler
+	Host             string
+	Port             string
+	Env              string
+	Router           *gin.Engine
+	Handlers         []Handler
+	DatabaseInstance database.DatabaseInterface
+	Twilio           types.TwilioConfig
 }
 
 func NewServer(host, port, env string) *Server {
@@ -38,12 +38,7 @@ func NewServer(host, port, env string) *Server {
 }
 
 func (s *Server) AddHandlers() {
-	populateRoutesInput := PopulateRoutesInput{
-		db:           s.FirestoreDB,
-		twilioConfig: s.TwilioCfg,
-	}
-
-	PopulateRoutes(populateRoutesInput)
+	PopulateRoutes(*s)
 	s.Handlers = append(s.Handlers, Routes...)
 }
 
