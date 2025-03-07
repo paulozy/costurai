@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"github.com/paulozy/costurai/internal/entity"
 	"github.com/paulozy/costurai/internal/infra/database"
 	"github.com/paulozy/costurai/pkg"
 )
@@ -27,24 +28,30 @@ type AuthenticationInput struct {
 	Password string `json:"password"`
 }
 
-func (useCase *AuthenticationUseCase) DressmakerExecute(data AuthenticationInput) (string, pkg.Error) {
+type AuthenticationOutput struct {
+	Dressmaker *entity.Dressmaker `json:"dressmaker,omitempty"`
+	User       *entity.User       `json:"user,omitempty"`
+	Token      string             `json:"token"`
+}
+
+func (useCase *AuthenticationUseCase) DressmakerExecute(data AuthenticationInput) (*AuthenticationOutput, pkg.Error) {
 	dressmakerExists, err := useCase.DressMakerRepository.Exists(data.Email)
 	if err != nil {
-		return "", pkg.NewInternalServerError(err)
+		return nil, pkg.NewInternalServerError(err)
 	}
 
 	if !dressmakerExists {
-		return "", pkg.NewInvalidCredentialsError()
+		return nil, pkg.NewInvalidCredentialsError()
 	}
 
 	dressmaker, err := useCase.DressMakerRepository.FindByEmail(data.Email)
 	if err != nil {
-		return "", pkg.NewInternalServerError(err)
+		return nil, pkg.NewInternalServerError(err)
 	}
 
 	isValidPass := pkg.CompareHashAndPassword(dressmaker.Password, data.Password)
 	if !isValidPass {
-		return "", pkg.NewInvalidCredentialsError()
+		return nil, pkg.NewInvalidCredentialsError()
 	}
 
 	token, err := pkg.GenerateToken(pkg.GenerateTokenInput{
@@ -52,30 +59,35 @@ func (useCase *AuthenticationUseCase) DressmakerExecute(data AuthenticationInput
 		Subject: dressmaker.ID,
 	})
 	if err != nil {
-		return "", pkg.NewInternalServerError(err)
+		return nil, pkg.NewInternalServerError(err)
 	}
 
-	return token, pkg.Error{}
+	output := &AuthenticationOutput{
+		Dressmaker: dressmaker,
+		Token:      token,
+	}
+
+	return output, pkg.Error{}
 }
 
-func (useCase *AuthenticationUseCase) UserExecute(data AuthenticationInput) (string, pkg.Error) {
+func (useCase *AuthenticationUseCase) UserExecute(data AuthenticationInput) (*AuthenticationOutput, pkg.Error) {
 	userExists, err := useCase.UserRepository.Exists(data.Email)
 	if err != nil {
-		return "", pkg.NewInternalServerError(err)
+		return nil, pkg.NewInternalServerError(err)
 	}
 
 	if !userExists {
-		return "", pkg.NewInvalidCredentialsError()
+		return nil, pkg.NewInvalidCredentialsError()
 	}
 
 	user, err := useCase.UserRepository.FindByEmail(data.Email)
 	if err != nil {
-		return "", pkg.NewInternalServerError(err)
+		return nil, pkg.NewInternalServerError(err)
 	}
 
 	isValidPass := pkg.CompareHashAndPassword(user.Password, data.Password)
 	if !isValidPass {
-		return "", pkg.NewInvalidCredentialsError()
+		return nil, pkg.NewInvalidCredentialsError()
 	}
 
 	token, err := pkg.GenerateToken(pkg.GenerateTokenInput{
@@ -83,8 +95,13 @@ func (useCase *AuthenticationUseCase) UserExecute(data AuthenticationInput) (str
 		Subject: user.ID,
 	})
 	if err != nil {
-		return "", pkg.NewInternalServerError(err)
+		return nil, pkg.NewInternalServerError(err)
 	}
 
-	return token, pkg.Error{}
+	output := &AuthenticationOutput{
+		User:  user,
+		Token: token,
+	}
+
+	return output, pkg.Error{}
 }

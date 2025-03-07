@@ -25,13 +25,23 @@ func (ac *AuthController) AuthenticateDressmaker(c *gin.Context) {
 		return
 	}
 
-	token, err := ac.authenticationUseCase.DressmakerExecute(input)
+	output, err := ac.authenticationUseCase.DressmakerExecute(input)
 	if err.Message != "" {
 		c.JSON(err.Status, gin.H{"error": err.Message, "reason": err.Error})
 		return
 	}
 
-	c.JSON(200, gin.H{"token": token})
+	json := make(map[string]any)
+
+	if output.Dressmaker != nil {
+		json["user"] = output.Dressmaker
+	} else {
+		json["user"] = output.User
+	}
+
+	json["token"] = output.Token
+
+	c.JSON(200, json)
 }
 
 func (ac *AuthController) AuthenticateUser(c *gin.Context) {
@@ -41,11 +51,21 @@ func (ac *AuthController) AuthenticateUser(c *gin.Context) {
 		return
 	}
 
-	token, err := ac.authenticationUseCase.UserExecute(input)
+	output, err := ac.authenticationUseCase.UserExecute(input)
 	if err.Message != "" {
 		c.JSON(err.Status, gin.H{"error": err.Message})
 		return
 	}
 
-	c.JSON(200, gin.H{"token": token})
+	json := make(map[string]any)
+
+	if output.User != nil {
+		json["user"] = output.User
+	} else {
+		json["user"] = output.Dressmaker
+	}
+
+	json["token"] = output.Token
+
+	c.JSON(200, json)
 }
