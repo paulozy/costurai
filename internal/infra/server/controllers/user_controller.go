@@ -2,12 +2,10 @@ package controllers
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/paulozy/costurai/internal/infra/database"
 	usecases "github.com/paulozy/costurai/internal/usecase"
 )
 
 type UserController struct {
-	userRepository database.UserRepositoryInterface
 	createUserUseCase *usecases.CreateUserUseCase
 }
 
@@ -15,9 +13,8 @@ type UserUseCasesInput struct {
 	CreateUserUseCase *usecases.CreateUserUseCase
 }
 
-func NewUserController(ur database.UserRepositoryInterface, usecases UserUseCasesInput) *UserController {
+func NewUserController(usecases UserUseCasesInput) *UserController {
 	return &UserController{
-		userRepository: ur,
 		createUserUseCase: usecases.CreateUserUseCase,
 	}
 }

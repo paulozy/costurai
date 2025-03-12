@@ -2,7 +2,7 @@ package server
 
 import (
 	"github.com/paulozy/costurai/internal/infra/database"
-	"github.com/paulozy/costurai/internal/infra/factories"
+	factories "github.com/paulozy/costurai/internal/infra/factories/controllers"
 	"github.com/paulozy/costurai/internal/infra/server/types"
 )
 
@@ -22,10 +22,7 @@ func addDressmakerRoutes(
 	db database.DatabaseInterface,
 	twilio types.TwilioConfig,
 ) {
-	dressmakerController := factories.DressmakerControllerFactory(
-		db,
-		twilio,
-	)
+	dressmakerController := factories.DressmakerControllerFactory(db, twilio)
 
 	dressmakerControllerRoutes := []Handler{
 		{

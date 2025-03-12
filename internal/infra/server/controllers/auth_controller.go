@@ -4,14 +4,12 @@ import (
 	"fmt"
 
 	"github.com/gin-gonic/gin"
-	"github.com/paulozy/costurai/internal/infra/database"
 	usecases "github.com/paulozy/costurai/internal/usecase"
 )
 
 type AuthController struct {
-	authenticationUseCase *usecases.AuthenticationUseCase
-	sendOtpCodeUseCase    *usecases.SendOTPCodeUseCase
-	dressMakerRepository  database.DressmakerRepositoryInterface
+	AuthenticationUseCase *usecases.AuthenticationUseCase
+	SendOtpCodeUseCase    *usecases.SendOTPCodeUseCase
 }
 
 type AuthUseCasesInput struct {
@@ -21,12 +19,10 @@ type AuthUseCasesInput struct {
 
 func NewAuthController(
 	usecases AuthUseCasesInput,
-	dr database.DressmakerRepositoryInterface,
 ) *AuthController {
 	return &AuthController{
-		authenticationUseCase: usecases.AuthUseCase,
-		sendOtpCodeUseCase:    usecases.SendOtpCodeUseCase,
-		dressMakerRepository:  dr,
+		AuthenticationUseCase: usecases.AuthUseCase,
+		SendOtpCodeUseCase:    usecases.SendOtpCodeUseCase,
 	}
 }
 
@@ -37,7 +33,7 @@ func (ac *AuthController) AuthenticateDressmaker(c *gin.Context) {
 		return
 	}
 
-	output, err := ac.authenticationUseCase.DressmakerExecute(input)
+	output, err := ac.AuthenticationUseCase.DressmakerExecute(input)
 	if err.Message != "" {
 		c.JSON(err.Status, gin.H{"error": err.Message, "reason": err.Error})
 		return
@@ -63,7 +59,7 @@ func (ac *AuthController) AuthenticateUser(c *gin.Context) {
 		return
 	}
 
-	output, err := ac.authenticationUseCase.UserExecute(input)
+	output, err := ac.AuthenticationUseCase.UserExecute(input)
 	if err.Message != "" {
 		c.JSON(err.Status, gin.H{"error": err.Message})
 		return
@@ -97,7 +93,7 @@ func (ac *AuthController) SendOTPCode(c *gin.Context) {
 		return
 	}
 
-	output, err := ac.sendOtpCodeUseCase.Execute(input)
+	output, err := ac.SendOtpCodeUseCase.Execute(input)
 	if err.Message != "" {
 		c.JSON(err.Status, gin.H{"error": err.Message})
 		return

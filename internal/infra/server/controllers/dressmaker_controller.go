@@ -5,13 +5,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/paulozy/costurai/internal/infra/database"
 	usecases "github.com/paulozy/costurai/internal/usecase"
 )
 
 type DressmakerController struct {
-	dressMakerRepository             database.DressmakerRepositoryInterface
-	dressMakerReviewsRepository      database.DressmakerReviewsRepositoryInterface
 	createDressmakerUseCase          *usecases.CreateDressMakerUseCase
 	showDressmakerUseCase            *usecases.ShowDressmakerUseCase
 	updateDressmakerUseCase          *usecases.UpdateDressMakerUseCase
@@ -29,10 +26,8 @@ type DressmakerUseCasesInput struct {
 	EnableDressmakerUseCase          *usecases.EnableDressmakerUseCase
 }
 
-func NewDressmakerController(dmRepo database.DressmakerRepositoryInterface, dmrRepo database.DressmakerReviewsRepositoryInterface, usecases DressmakerUseCasesInput) *DressmakerController {
+func NewDressmakerController(usecases DressmakerUseCasesInput) *DressmakerController {
 	return &DressmakerController{
-		dressMakerRepository:             dmRepo,
-		dressMakerReviewsRepository:      dmrRepo,
 		createDressmakerUseCase:          usecases.CreateDressmakerUseCase,
 		showDressmakerUseCase:            usecases.ShowDressmakerUseCase,
 		updateDressmakerUseCase:          usecases.UpdateDressmakerUseCase,
