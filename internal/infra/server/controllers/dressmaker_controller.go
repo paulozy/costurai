@@ -130,6 +130,12 @@ func (dc *DressmakerController) AddDressmakerReview(c *gin.Context) {
 
 func (dc *DressmakerController) EnableDressmaker(c *gin.Context) {
 	ID := c.Param("id")
+	LoggedUser := c.GetString("user")
+
+	if ID != LoggedUser {
+		c.JSON(401, gin.H{"error": "Unauthorized"})
+		return
+	}
 
 	var input usecases.EnableDressmakerInput
 	if err := c.ShouldBindJSON(&input); err != nil {

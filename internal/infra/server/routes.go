@@ -53,7 +53,7 @@ func addDressmakerRoutes(
 		{
 			Path:   "/dressmakers/:id/enable",
 			Method: "PUT",
-			Auth:   false,
+			Auth:   true,
 			Func:   dressmakerController.EnableDressmaker,
 		},
 	}
