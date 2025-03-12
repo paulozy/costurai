@@ -24,6 +24,7 @@ func DressmakerControllerFactory(
 	)
 
 	createDressmakerUseCase := usecases.NewCreateDressMakerUseCase(dressMakerRepository)
+	showDressmakerUseCase := usecases.NewShowDressmakerUseCase(dressMakerRepository)
 	enableDresskamerUseCase := usecases.NewEnableDressmakerUseCase(dressMakerRepository, twilioOtpService)
 	updateDressmakerUseCase := usecases.NewUpdateDressMakerUseCase(dressMakerRepository)
 	getDressmakersByProximityUseCase := usecases.NewGetDressmakersByProximityUseCase(dressMakerRepository)
@@ -35,6 +36,7 @@ func DressmakerControllerFactory(
 		GetDressmakersByProximityUseCase: getDressmakersByProximityUseCase,
 		AddDressmakerReviewUseCase:       addDressmakerReviewUseCase,
 		EnableDressmakerUseCase:          enableDresskamerUseCase,
+		ShowDressmakerUseCase:            showDressmakerUseCase,
 	}
 
 	dressmakerController := controllers.NewDressmakerController(dressMakerRepository, dressMakerReviewsRepository, dressmakerUseCases)

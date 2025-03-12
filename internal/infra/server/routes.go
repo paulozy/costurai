@@ -40,6 +40,11 @@ func addDressmakerRoutes(
 		},
 		{
 			Path:   "/dressmakers/:id",
+			Method: "GET",
+			Func:   dressmakerController.ShowDressmaker,
+		},
+		{
+			Path:   "/dressmakers/:id",
 			Method: "PUT",
 			Auth:   true,
 			Func:   dressmakerController.UpdateDressmaker,

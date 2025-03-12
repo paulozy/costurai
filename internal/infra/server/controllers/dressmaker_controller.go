@@ -13,6 +13,7 @@ type DressmakerController struct {
 	dressMakerRepository             database.DressmakerRepositoryInterface
 	dressMakerReviewsRepository      database.DressmakerReviewsRepositoryInterface
 	createDressmakerUseCase          *usecases.CreateDressMakerUseCase
+	showDressmakerUseCase            *usecases.ShowDressmakerUseCase
 	updateDressmakerUseCase          *usecases.UpdateDressMakerUseCase
 	getDressmakersByProximityUseCase *usecases.GetDressmakersByProximityUseCase
 	addDressmakerReviewUseCase       *usecases.AddDressmakerReviewUseCase
@@ -21,6 +22,7 @@ type DressmakerController struct {
 
 type DressmakerUseCasesInput struct {
 	CreateDressmakerUseCase          *usecases.CreateDressMakerUseCase
+	ShowDressmakerUseCase            *usecases.ShowDressmakerUseCase
 	UpdateDressmakerUseCase          *usecases.UpdateDressMakerUseCase
 	GetDressmakersByProximityUseCase *usecases.GetDressmakersByProximityUseCase
 	AddDressmakerReviewUseCase       *usecases.AddDressmakerReviewUseCase
@@ -32,6 +34,7 @@ func NewDressmakerController(dmRepo database.DressmakerRepositoryInterface, dmrR
 		dressMakerRepository:             dmRepo,
 		dressMakerReviewsRepository:      dmrRepo,
 		createDressmakerUseCase:          usecases.CreateDressmakerUseCase,
+		showDressmakerUseCase:            usecases.ShowDressmakerUseCase,
 		updateDressmakerUseCase:          usecases.UpdateDressmakerUseCase,
 		getDressmakersByProximityUseCase: usecases.GetDressmakersByProximityUseCase,
 		addDressmakerReviewUseCase:       usecases.AddDressmakerReviewUseCase,
@@ -53,6 +56,23 @@ func (dc *DressmakerController) CreateDressmaker(c *gin.Context) {
 	}
 
 	c.JSON(201, gin.H{"data": dressmaker})
+}
+
+func (dc *DressmakerController) ShowDressmaker(c *gin.Context) {
+	ID := c.Param("id")
+
+	input := &usecases.ShowDressmakerInput{
+		ID: ID,
+	}
+
+	dressmaker, err := dc.showDressmakerUseCase.Execute(*input)
+	if err.Message != "" {
+		log.Println(err)
+		c.JSON(err.Status, gin.H{"error": err.Message})
+		return
+	}
+
+	c.JSON(200, gin.H{"data": dressmaker})
 }
 
 func (dc *DressmakerController) UpdateDressmaker(c *gin.Context) {
