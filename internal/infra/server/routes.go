@@ -14,7 +14,7 @@ func PopulateRoutes(server Server) []Handler {
 		server.Twilio,
 	)
 	addUserRoutes(server.DatabaseInstance)
-	addAuthRoutes(server.DatabaseInstance)
+	addAuthRoutes(server.DatabaseInstance, server.Twilio)
 	return Routes
 }
 
@@ -75,20 +75,27 @@ func addUserRoutes(db database.DatabaseInterface) {
 	Routes = append(Routes, userControllerRoutes...)
 }
 
-func addAuthRoutes(db database.DatabaseInterface) {
-	authController := factories.AuthControllerFactory(db)
+func addAuthRoutes(db database.DatabaseInterface, twilio types.TwilioConfig) {
+	authController := factories.AuthControllerFactory(db, twilio)
 
-	dressmakerAuthHandler := Handler{
-		Path:   "/dressmakers/auth",
-		Method: "POST",
-		Func:   authController.AuthenticateDressmaker,
+	authControllerRoutes := []Handler{
+		{
+			Path:   "/dressmakers/auth",
+			Method: "POST",
+			Func:   authController.AuthenticateDressmaker,
+		},
+		{
+			Path:   "/users/auth",
+			Method: "POST",
+			Func:   authController.AuthenticateUser,
+		},
+		{
+			Path:   "/otp/:id",
+			Method: "POST",
+			Auth:   true,
+			Func:   authController.SendOTPCode,
+		},
 	}
 
-	userAuthHandler := Handler{
-		Path:   "/users/auth",
-		Method: "POST",
-		Func:   authController.AuthenticateUser,
-	}
-
-	Routes = append(Routes, dressmakerAuthHandler, userAuthHandler)
+	Routes = append(Routes, authControllerRoutes...)
 }
