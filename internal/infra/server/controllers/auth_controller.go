@@ -31,7 +31,7 @@ func (ac *AuthController) AuthenticateDressmaker(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, gin.H{"token": token})
+	c.JSON(200, gin.H{"data": token})
 }
 
 func (ac *AuthController) AuthenticateUser(c *gin.Context) {

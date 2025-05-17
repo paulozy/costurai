@@ -16,6 +16,7 @@ type DressmakerController struct {
 	updateDressmakerUseCase          *usecases.UpdateDressMakerUseCase
 	getDressmakersByProximityUseCase *usecases.GetDressmakersByProximityUseCase
 	addDressmakerReviewUseCase       *usecases.AddDressmakerReviewUseCase
+	showDressmakerUseCase            *usecases.ShowDressMakerUseCase
 }
 
 type DressmakerUseCasesInput struct {
@@ -23,6 +24,7 @@ type DressmakerUseCasesInput struct {
 	UpdateDressmakerUseCase          *usecases.UpdateDressMakerUseCase
 	GetDressmakersByProximityUseCase *usecases.GetDressmakersByProximityUseCase
 	AddDressmakerReviewUseCase       *usecases.AddDressmakerReviewUseCase
+	ShowDressmakerUseCase            *usecases.ShowDressMakerUseCase
 }
 
 func NewDressmakerController(dmRepo database.DressmakerRepositoryInterface, dmrRepo database.DressmakerReviewsRepositoryInterface, usecases DressmakerUseCasesInput) *DressmakerController {
@@ -33,6 +35,7 @@ func NewDressmakerController(dmRepo database.DressmakerRepositoryInterface, dmrR
 		updateDressmakerUseCase:          usecases.UpdateDressmakerUseCase,
 		getDressmakersByProximityUseCase: usecases.GetDressmakersByProximityUseCase,
 		addDressmakerReviewUseCase:       usecases.AddDressmakerReviewUseCase,
+		showDressmakerUseCase:            usecases.ShowDressmakerUseCase,
 	}
 }
 
@@ -103,6 +106,21 @@ func (dc *DressmakerController) GetDressmakers(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{"items": dressmakers.Items, "pagination": dressmakers.PaginationInfo})
+}
+
+func (dc *DressmakerController) GetDressmaker(c *gin.Context) {
+	var input usecases.ShowDressMakerInput
+
+	ID := c.Param("id")
+	input.ID = ID
+
+	dressmaker, ucError := dc.showDressmakerUseCase.Execute(input)
+
+	if ucError.Message != "" {
+		c.JSON(ucError.Status, gin.H{"error": ucError.Message, "reason": ucError.Error})
+		return
+	}
+	c.JSON(200, gin.H{"data": dressmaker})
 }
 
 func (dc *DressmakerController) AddDressmakerReview(c *gin.Context) {

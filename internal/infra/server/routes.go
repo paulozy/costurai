@@ -23,6 +23,7 @@ func addDressmakerRoutes(db *firestore.Client) {
 	createDressmakerUseCase := usecases.NewCreateDressMakerUseCase(dressMakerRepository)
 	updateDressmakerUseCase := usecases.NewUpdateDressMakerUseCase(dressMakerRepository)
 	getDressmakersByProximityUseCase := usecases.NewGetDressmakersByProximityUseCase(dressMakerRepository)
+	showDressmakerUseCase := usecases.NewShowDressMakerUseCase(dressMakerRepository)
 	addDressmakerReviewUseCase := usecases.NewAddDressmakerReviewUseCase(dressMakerRepository, dressMakerReviewsRepository)
 
 	dressmakerUseCases := controllers.DressmakerUseCasesInput{
@@ -30,6 +31,7 @@ func addDressmakerRoutes(db *firestore.Client) {
 		UpdateDressmakerUseCase:          updateDressmakerUseCase,
 		GetDressmakersByProximityUseCase: getDressmakersByProximityUseCase,
 		AddDressmakerReviewUseCase:       addDressmakerReviewUseCase,
+		ShowDressmakerUseCase:            showDressmakerUseCase,
 	}
 
 	dressmakerController := controllers.NewDressmakerController(dressMakerRepository, nil, dressmakerUseCases)
@@ -44,6 +46,11 @@ func addDressmakerRoutes(db *firestore.Client) {
 			Path:   "/dressmakers",
 			Method: "GET",
 			Func:   dressmakerController.GetDressmakers,
+		},
+		{
+			Path:   "/dressmakers/:id",
+			Method: "GET",
+			Func:   dressmakerController.GetDressmaker,
 		},
 		{
 			Path:   "/dressmakers/:id",
