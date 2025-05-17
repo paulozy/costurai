@@ -4,7 +4,9 @@ import (
 	"cloud.google.com/go/firestore"
 	"github.com/paulozy/costurai/internal/infra/database/firestore/repositories"
 	"github.com/paulozy/costurai/internal/infra/server/controllers"
+	services "github.com/paulozy/costurai/internal/infra/services/sms"
 	usecases "github.com/paulozy/costurai/internal/usecase"
+	authUseCases "github.com/paulozy/costurai/internal/usecase/auth"
 )
 
 var Routes = []Handler{}
@@ -92,29 +94,48 @@ func addUserRoutes(db *firestore.Client) {
 }
 
 func addAuthRoutes(db *firestore.Client) {
-	dressMakerRepository := repositories.NewFirestoreDressmakerRepository(db)
+	dressmakerRepository := repositories.NewFirestoreDressmakerRepository(db)
 	userRepository := repositories.NewFirestoreUserRepository(db)
 
-	repositories := usecases.NewAuthenticationUseCaseInput{
-		DressMakerRepository: dressMakerRepository,
-		UserRepository:       userRepository,
+	authDressmakerUseCase := authUseCases.NewDressmakerAuthenticationUseCase(authUseCases.NewAuthDressmakerUseCaseInput{
+		DressmakerRepository: dressmakerRepository,
+	})
+	authUserUseCase := authUseCases.NewUserAuthUseCase(authUseCases.NewAuthUserUseCaseInput{
+		UserRepository: userRepository,
+	})
+
+	OTPService := services.NewTwilioService()
+	sendOTPUseCase := authUseCases.NewSentOTPUseCase(
+		authUseCases.NewSendOTPUseCaseInput{
+			OTPService: OTPService,
+		},
+	)
+
+	authController := controllers.NewAuthController(
+		authDressmakerUseCase,
+		authUserUseCase,
+		sendOTPUseCase,
+		dressmakerRepository,
+		userRepository,
+	)
+
+	authHandlers := []Handler{
+		{
+			Path:   "/dressmakers/auth",
+			Method: "POST",
+			Func:   authController.AuthenticateDressmaker,
+		},
+		{
+			Path:   "/users/auth",
+			Method: "POST",
+			Func:   authController.AuthenticateUser,
+		},
+		{
+			Path:   "/otp",
+			Method: "POST",
+			Func:   authController.SendOTP,
+		},
 	}
 
-	authenticationUseCase := usecases.NewDressMakerAuthenticationUseCase(repositories)
-
-	authController := controllers.NewAuthController(authenticationUseCase, dressMakerRepository)
-
-	dressmakerAuthHandler := Handler{
-		Path:   "/dressmakers/auth",
-		Method: "POST",
-		Func:   authController.AuthenticateDressmaker,
-	}
-
-	userAuthHandler := Handler{
-		Path:   "/users/auth",
-		Method: "POST",
-		Func:   authController.AuthenticateUser,
-	}
-
-	Routes = append(Routes, dressmakerAuthHandler, userAuthHandler)
+	Routes = append(Routes, authHandlers...)
 }
