@@ -22,7 +22,7 @@ func NewSentOTPUseCase(services NewSendOTPUseCaseInput) *SendOTPUseCase {
 	}
 }
 
-func (useCase *SendOTPUseCase) Execute(payload dtos.OTPSendAndVerifyInput) pkg.Error {
+func (useCase *SendOTPUseCase) Execute(payload dtos.SendOTPInput) pkg.Error {
 	err := useCase.OTPService.Send(payload.Phone)
 	if err != nil {
 		fmt.Println(err)

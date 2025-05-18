@@ -149,6 +149,7 @@ func (r *FirestoreDressmakerRepository) Update(dressmaker *entity.Dressmaker) er
 		"Reviews":    dressmaker.Reviews,
 		"Services":   dressmaker.Services,
 		"Grade":      dressmaker.Grade,
+		"Enabled":    dressmaker.Enabled,
 		"Updated_at": dressmaker.UpdatedAt,
 	}, firestore.MergeAll)
 

@@ -11,6 +11,7 @@ type AuthController struct {
 	authDressmakerUseCase *usecases.AuthDressmakerUseCase
 	authUserUseCase       *usecases.AuthUserUseCase
 	sendOTPUseCase        *usecases.SendOTPUseCase
+	VerifyOTPUseCase      *usecases.VerifyOTPUseCase
 	dressmakerRepository  database.DressmakerRepositoryInterface
 	userRepository        database.UserRepositoryInterface
 }
@@ -19,6 +20,7 @@ func NewAuthController(
 	authDressmakerUseCase *usecases.AuthDressmakerUseCase,
 	authUserUseCase *usecases.AuthUserUseCase,
 	sendOTPUseCase *usecases.SendOTPUseCase,
+	verifyOTPUseCase *usecases.VerifyOTPUseCase,
 	dr database.DressmakerRepositoryInterface,
 	ur database.UserRepositoryInterface,
 ) *AuthController {
@@ -26,6 +28,7 @@ func NewAuthController(
 		authDressmakerUseCase: authDressmakerUseCase,
 		authUserUseCase:       authUserUseCase,
 		sendOTPUseCase:        sendOTPUseCase,
+		VerifyOTPUseCase:      verifyOTPUseCase,
 		dressmakerRepository:  dr,
 		userRepository:        ur,
 	}
@@ -64,7 +67,7 @@ func (ac *AuthController) AuthenticateUser(c *gin.Context) {
 }
 
 func (ac *AuthController) SendOTP(c *gin.Context) {
-	var input dtos.OTPSendAndVerifyInput
+	var input dtos.SendOTPInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -77,4 +80,33 @@ func (ac *AuthController) SendOTP(c *gin.Context) {
 	}
 
 	c.JSON(200, gin.H{"data": "Code sent succefully"})
+}
+
+func (ac *AuthController) VerifyOTP(c *gin.Context) {
+	var input dtos.VerifyOTPInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	LoggedUser := c.GetString("user")
+
+	switch c.FullPath() {
+	case "/otp/dressmaker/verify":
+		input.Enabling = "dressmaker"
+		input.DressmakerID = LoggedUser
+	case "/otp/user/verify":
+		input.Enabling = "user"
+		input.UserID = LoggedUser
+	default:
+		input.Enabling = ""
+	}
+
+	err := ac.VerifyOTPUseCase.Execute(input)
+	if err.Message != "" {
+		c.JSON(err.Status, gin.H{"error": err.Message})
+		return
+	}
+
+	c.JSON(200, gin.H{"data": "OTP verified successfully"})
 }

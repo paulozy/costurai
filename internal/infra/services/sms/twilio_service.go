@@ -46,3 +46,18 @@ func (s *TwilioService) Send(to string) error {
 
 	return nil
 }
+
+func (s *TwilioService) Verify(phone, code string) (bool, error) {
+	params := &verify.CreateVerificationCheckParams{}
+	params.SetTo(phone)
+	params.SetCode(code)
+
+	resp, err := s.Client.VerifyV2.CreateVerificationCheck(s.ServiceSID, params)
+	if err != nil {
+		return false, err
+	} else if resp.Status == nil || *resp.Status != "approved" {
+		return false, err
+	}
+
+	return true, nil
+}

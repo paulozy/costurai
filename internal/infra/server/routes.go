@@ -110,11 +110,17 @@ func addAuthRoutes(db *firestore.Client) {
 			OTPService: OTPService,
 		},
 	)
+	verifyOTPUseCase := authUseCases.NewVerifyOTPUseCase(authUseCases.NewVerifyOTPUseCaseInput{
+		OTPService:           OTPService,
+		DressmakerRepository: dressmakerRepository,
+		UserRepository:       userRepository,
+	})
 
 	authController := controllers.NewAuthController(
 		authDressmakerUseCase,
 		authUserUseCase,
 		sendOTPUseCase,
+		verifyOTPUseCase,
 		dressmakerRepository,
 		userRepository,
 	)
@@ -134,6 +140,18 @@ func addAuthRoutes(db *firestore.Client) {
 			Path:   "/otp",
 			Method: "POST",
 			Func:   authController.SendOTP,
+		},
+		{
+			Path:   "/otp/dressmaker/verify",
+			Method: "POST",
+			Func:   authController.VerifyOTP,
+			Auth:   true,
+		},
+		{
+			Path:   "/otp/user/verify",
+			Method: "POST",
+			Func:   authController.VerifyOTP,
+			Auth:   true,
 		},
 	}
 

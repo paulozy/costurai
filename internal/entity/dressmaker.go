@@ -13,12 +13,14 @@ type Dressmaker struct {
 	Email    string `json:"email"`
 	Password string `json:"-"`
 
-	Name      string    `json:"name"`
-	Contact   string    `json:"contact"`
-	Location  Location  `json:"location"`
-	Services  []string  `json:"services"`
-	Grade     float64   `json:"grade"`
-	Reviews   []Review  `json:"reviews"`
+	Name     string   `json:"name"`
+	Contact  string   `json:"contact"`
+	Enabled  bool     `json:"enabled"`
+	Grade    float64  `json:"grade"`
+	Services []string `json:"services"`
+	Location Location `json:"location"`
+	Reviews  []Review `json:"reviews"`
+
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -38,12 +40,21 @@ func NewDressmaker(email, password, name, contact string, location Location, ser
 		Location:  location,
 		Services:  services,
 		Grade:     0,
+		Enabled:   false,
 		Reviews:   []Review{},
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 
 	return dressmaker, nil
+}
+
+func (dressmaker *Dressmaker) Enable() {
+	dressmaker.Enabled = true
+}
+
+func (dressmaker *Dressmaker) Disable() {
+	dressmaker.Enabled = false
 }
 
 func (dressmaker *Dressmaker) AddReview(review Review) {

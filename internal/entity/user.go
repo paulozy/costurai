@@ -8,13 +8,15 @@ import (
 )
 
 type User struct {
-	ID       string `json:"id"`
-	Email    string `json:"email"`
-	Password string `json:"-"`
-	Name     string `json:"name"`
+	ID       string   `json:"id"`
+	Email    string   `json:"email"`
+	Password string   `json:"-"`
+	Name     string   `json:"name"`
+	Enabled  bool     `json:"enabled"`
 	Location Location `json:"location"`
-	CreatedAt string   `json:"created_at"`
-	UpdatedAt string   `json:"updated_at"`
+
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
 }
 
 func NewUser(email, password, name string, location Location) (*User, error) {
@@ -34,6 +36,14 @@ func NewUser(email, password, name string, location Location) (*User, error) {
 	}
 
 	return user, nil
+}
+
+func (user *User) Enable() {
+	user.Enabled = true
+}
+
+func (user *User) Disable() {
+	user.Enabled = false
 }
 
 func (user *User) UpdateLocation(location Location) {
