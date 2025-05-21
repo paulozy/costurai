@@ -58,6 +58,30 @@ func validateInput(data entity.CreateDressmakerInput) pkg.Error {
 		return pkg.NewMissingFieldError("contact")
 	}
 
+	if (data.Address == entity.Address{}) {
+		return pkg.NewMissingFieldError("address")
+	}
+
+	if data.Address.Street == "" {
+		return pkg.NewMissingFieldError("address.street")
+	}
+
+	if data.Address.Number == "" {
+		return pkg.NewMissingFieldError("address.number")
+	}
+
+	if data.Address.Neighborhood == "" {
+		return pkg.NewMissingFieldError("address.neighborhood")
+	}
+
+	if data.Address.City == "" {
+		return pkg.NewMissingFieldError("address.city")
+	}
+
+	if data.Address.State == "" {
+		return pkg.NewMissingFieldError("address.state")
+	}
+
 	if data.Address.Location.Latitude == 0 {
 		return pkg.NewMissingFieldError("latitude")
 	}
