@@ -21,19 +21,16 @@ func PopulateRoutes(db *firestore.Client) []Handler {
 
 func addDressmakerRoutes(db *firestore.Client) {
 	dressMakerRepository := repositories.NewFirestoreDressmakerRepository(db)
-	dressMakerReviewsRepository := repositories.NewFirestoreReviewsRepository(db)
 
 	createDressmakerUseCase := dressmakerUseCases.NewCreateDressMakerUseCase(dressMakerRepository)
 	updateDressmakerUseCase := dressmakerUseCases.NewUpdateDressMakerUseCase(dressMakerRepository)
 	getDressmakersByProximityUseCase := dressmakerUseCases.NewGetDressmakersByProximityUseCase(dressMakerRepository)
 	showDressmakerUseCase := dressmakerUseCases.NewShowDressMakerUseCase(dressMakerRepository)
-	addDressmakerReviewUseCase := dressmakerUseCases.NewAddDressmakerReviewUseCase(dressMakerRepository, dressMakerReviewsRepository)
 
 	dressmakerUseCases := controllers.DressmakerUseCasesInput{
 		CreateDressmakerUseCase:          createDressmakerUseCase,
 		UpdateDressmakerUseCase:          updateDressmakerUseCase,
 		GetDressmakersByProximityUseCase: getDressmakersByProximityUseCase,
-		AddDressmakerReviewUseCase:       addDressmakerReviewUseCase,
 		ShowDressmakerUseCase:            showDressmakerUseCase,
 	}
 
@@ -60,12 +57,6 @@ func addDressmakerRoutes(db *firestore.Client) {
 			Method: "PUT",
 			Auth:   true,
 			Func:   dressmakerController.UpdateDressmaker,
-		},
-		{
-			Path:   "/dressmakers/reviews",
-			Method: "POST",
-			Auth:   true,
-			Func:   dressmakerController.AddDressmakerReview,
 		},
 	}
 

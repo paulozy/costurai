@@ -42,7 +42,7 @@ func (usecase *AddDressmakerReviewUseCase) Execute(input AddDressmakerReviewUseC
 
 	review := entity.NewReview(input.DressmakerID, input.UserID, input.Comment, input.Grade)
 
-	dressmaker.AddReview(*review)
+	// dressmaker.AddReview(*review)
 
 	err = usecase.DressmakerRepository.Update(dressmaker)
 	if err != nil {

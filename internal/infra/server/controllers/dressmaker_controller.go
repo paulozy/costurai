@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/paulozy/costurai/internal/entity"
 	"github.com/paulozy/costurai/internal/infra/database"
 	usecases "github.com/paulozy/costurai/internal/usecase/dressmaker"
 )
@@ -15,7 +16,6 @@ type DressmakerController struct {
 	createDressmakerUseCase          *usecases.CreateDressMakerUseCase
 	updateDressmakerUseCase          *usecases.UpdateDressMakerUseCase
 	getDressmakersByProximityUseCase *usecases.GetDressmakersByProximityUseCase
-	addDressmakerReviewUseCase       *usecases.AddDressmakerReviewUseCase
 	showDressmakerUseCase            *usecases.ShowDressMakerUseCase
 }
 
@@ -23,7 +23,6 @@ type DressmakerUseCasesInput struct {
 	CreateDressmakerUseCase          *usecases.CreateDressMakerUseCase
 	UpdateDressmakerUseCase          *usecases.UpdateDressMakerUseCase
 	GetDressmakersByProximityUseCase *usecases.GetDressmakersByProximityUseCase
-	AddDressmakerReviewUseCase       *usecases.AddDressmakerReviewUseCase
 	ShowDressmakerUseCase            *usecases.ShowDressMakerUseCase
 }
 
@@ -34,13 +33,12 @@ func NewDressmakerController(dmRepo database.DressmakerRepositoryInterface, dmrR
 		createDressmakerUseCase:          usecases.CreateDressmakerUseCase,
 		updateDressmakerUseCase:          usecases.UpdateDressmakerUseCase,
 		getDressmakersByProximityUseCase: usecases.GetDressmakersByProximityUseCase,
-		addDressmakerReviewUseCase:       usecases.AddDressmakerReviewUseCase,
 		showDressmakerUseCase:            usecases.ShowDressmakerUseCase,
 	}
 }
 
 func (dc *DressmakerController) CreateDressmaker(c *gin.Context) {
-	var input usecases.CreateDressMakerInput
+	var input entity.CreateDressmakerInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -64,7 +62,7 @@ func (dc *DressmakerController) UpdateDressmaker(c *gin.Context) {
 		return
 	}
 
-	var input usecases.UpdateDressMakerInput
+	var input entity.UpdateDressmakerInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		log.Println(err)
 		c.JSON(400, gin.H{"error": err.Error()})
@@ -120,25 +118,5 @@ func (dc *DressmakerController) GetDressmaker(c *gin.Context) {
 		c.JSON(ucError.Status, gin.H{"error": ucError.Message, "reason": ucError.Error})
 		return
 	}
-	c.JSON(200, gin.H{"data": dressmaker})
-}
-
-func (dc *DressmakerController) AddDressmakerReview(c *gin.Context) {
-	userID := c.GetString("user")
-
-	var input usecases.AddDressmakerReviewUseCaseInput
-	if err := c.ShouldBindJSON(&input); err != nil {
-		c.JSON(400, gin.H{"error": err.Error(), "reason": err})
-		return
-	}
-
-	input.UserID = userID
-
-	dressmaker, ucError := dc.addDressmakerReviewUseCase.Execute(input)
-	if ucError.Message != "" {
-		c.JSON(ucError.Status, gin.H{"error": ucError.Message, "reason": ucError.Error})
-		return
-	}
-
 	c.JSON(200, gin.H{"data": dressmaker})
 }
