@@ -5,8 +5,9 @@ import (
 	"github.com/paulozy/costurai/internal/infra/database/firestore/repositories"
 	"github.com/paulozy/costurai/internal/infra/server/controllers"
 	services "github.com/paulozy/costurai/internal/infra/services/sms"
-	usecases "github.com/paulozy/costurai/internal/usecase"
 	authUseCases "github.com/paulozy/costurai/internal/usecase/auth"
+	dressmakerUseCases "github.com/paulozy/costurai/internal/usecase/dressmaker"
+	userUseCases "github.com/paulozy/costurai/internal/usecase/user"
 )
 
 var Routes = []Handler{}
@@ -22,11 +23,11 @@ func addDressmakerRoutes(db *firestore.Client) {
 	dressMakerRepository := repositories.NewFirestoreDressmakerRepository(db)
 	dressMakerReviewsRepository := repositories.NewFirestoreReviewsRepository(db)
 
-	createDressmakerUseCase := usecases.NewCreateDressMakerUseCase(dressMakerRepository)
-	updateDressmakerUseCase := usecases.NewUpdateDressMakerUseCase(dressMakerRepository)
-	getDressmakersByProximityUseCase := usecases.NewGetDressmakersByProximityUseCase(dressMakerRepository)
-	showDressmakerUseCase := usecases.NewShowDressMakerUseCase(dressMakerRepository)
-	addDressmakerReviewUseCase := usecases.NewAddDressmakerReviewUseCase(dressMakerRepository, dressMakerReviewsRepository)
+	createDressmakerUseCase := dressmakerUseCases.NewCreateDressMakerUseCase(dressMakerRepository)
+	updateDressmakerUseCase := dressmakerUseCases.NewUpdateDressMakerUseCase(dressMakerRepository)
+	getDressmakersByProximityUseCase := dressmakerUseCases.NewGetDressmakersByProximityUseCase(dressMakerRepository)
+	showDressmakerUseCase := dressmakerUseCases.NewShowDressMakerUseCase(dressMakerRepository)
+	addDressmakerReviewUseCase := dressmakerUseCases.NewAddDressmakerReviewUseCase(dressMakerRepository, dressMakerReviewsRepository)
 
 	dressmakerUseCases := controllers.DressmakerUseCasesInput{
 		CreateDressmakerUseCase:          createDressmakerUseCase,
@@ -74,7 +75,7 @@ func addDressmakerRoutes(db *firestore.Client) {
 func addUserRoutes(db *firestore.Client) {
 	userRepository := repositories.NewFirestoreUserRepository(db)
 
-	createUserUseCase := usecases.NewCreateUserUseCase(userRepository)
+	createUserUseCase := userUseCases.NewCreateUserUseCase(userRepository)
 
 	userUseCases := controllers.UserUseCasesInput{
 		CreateUserUseCase: createUserUseCase,

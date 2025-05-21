@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/paulozy/costurai/internal/infra/database"
-	usecases "github.com/paulozy/costurai/internal/usecase"
+	usecases "github.com/paulozy/costurai/internal/usecase/dressmaker"
 )
 
 type DressmakerController struct {
