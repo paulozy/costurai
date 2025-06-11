@@ -30,6 +30,12 @@ type UserRepositoryInterface interface {
 	Update(user *entity.User) error
 }
 
+type SubscriptionRepositoryInterface interface {
+	Create(sub *entity.Subscription) error
+	FindByID(id string) (*entity.Subscription, error)
+	Update(sub *entity.Subscription) error
+}
+
 type DressmakerReviewsRepositoryInterface interface {
 	Create(review *entity.Review) error
 }
