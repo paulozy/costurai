@@ -3,6 +3,11 @@ package entity
 import "fmt"
 
 type PlanType string
+
+func (p PlanType) String() any {
+	panic("unimplemented")
+}
+
 type PeriodicityType string
 
 // Definitions of Plan
@@ -60,25 +65,13 @@ func (builder *PlanBuilder) WithPeriodicity(p PeriodicityType) *PlanBuilder {
 	return builder
 }
 
-func (builder *PlanBuilder) WithPrice(amount int32, precision int8, currency string) *PlanBuilder {
+func (builder *PlanBuilder) WithPrice(amount int32) *PlanBuilder {
 	builder.plan.Price = Price{
 		Amount:    amount,
-		Precision: precision,
-		Currency:  currency,
+		Precision: 2,
+		Currency:  "BRL",
 	}
 	return builder
-}
-
-func (b *PlanBuilder) ProStandard() *PlanBuilder {
-	return b.WithType(PlanTypePro).
-		WithPeriodicity(MonthlyPeriodicity).
-		WithPrice(349, 2, "BRL")
-}
-
-func (b *PlanBuilder) ProPlan() *PlanBuilder {
-	return b.WithType(PlanTypePro).
-		WithPeriodicity(MonthlyPeriodicity).
-		WithPrice(999, 2, "BRL")
 }
 
 func (b *PlanBuilder) Build() (Plan, error) {
