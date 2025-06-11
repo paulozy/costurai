@@ -7,20 +7,31 @@ import (
 	"github.com/google/uuid"
 )
 
+type Status string
+
+const (
+	StatusActive   Status = "active"
+	StatusPending  Status = "pending"
+	StatusCanceled Status = "canceled"
+)
+
 type Subscription struct {
 	ID           string      `json:"id"`
 	DressmakerID string      `json:"dressmakerId"`
-	PlanType     PlanType    `json:"planType"` // padrão fixo: "standard", "pro"
+	Plan         Plan        `json:"plan"` // padrão fixo: "standard", "pro"
 	Price        Price       `json:"price"`
 	Periodicity  Periodicity `json:"periodicity"`
+	Status       Status      `json:"status"`
 
-	StartedAt  time.Time  `json:"startedAt"`
+	StartedAt  *time.Time `json:"startedAt"`
 	ExpiresAt  *time.Time `json:"expiresAt,omitempty"`
 	CanceledAt *time.Time `json:"canceledAt,omitempty"`
-	Active     bool       `json:"active"`
 	GraceUntil *time.Time `json:"graceUntil,omitempty"` // até quando mantém acesso
-	CreatedAt  time.Time  `json:"createdAt"`
-	UpdatedAt  time.Time  `json:"updatedAt"`
+	GatewayId  *string    `json:"gatewayId,omitempty"`
+	PaymentURL *string    `json:"paymentURL,omitempty"`
+
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
 }
 
 func NewSubscription(dressmakerID string, plan Plan) (*Subscription, error) {
@@ -39,19 +50,17 @@ func NewSubscription(dressmakerID string, plan Plan) (*Subscription, error) {
 	return &Subscription{
 		ID:           uuid.New().String(),
 		DressmakerID: dressmakerID,
-		PlanType:     plan.Name.PlanType,
-		Price:        plan.Price,
-		Periodicity:  plan.Periodicity,
-		StartedAt:    now,
+		Plan:         plan,
+		StartedAt:    &now,
 		ExpiresAt:    &expires,
-		Active:       true,
+		Status:       StatusPending,
 		CreatedAt:    now,
 		UpdatedAt:    now,
 	}, nil
 }
 
 func (s *Subscription) IsActive() bool {
-	if !s.Active {
+	if s.Status != StatusActive {
 		return false
 	}
 	if s.ExpiresAt != nil && s.ExpiresAt.Before(time.Now()) {
@@ -74,7 +83,7 @@ func (s *Subscription) HasExpired() bool {
 
 func (s *Subscription) Cancel(gracePeriodDays int) {
 	now := time.Now()
-	s.Active = false
+	s.Status = StatusCanceled
 	s.CanceledAt = &now
 
 	if gracePeriodDays > 0 {
@@ -99,10 +108,10 @@ func (s *Subscription) Renew() error {
 	}
 
 	now := time.Now()
-	s.StartedAt = now
+	s.StartedAt = &now
 	expires := now.Add(duration)
 	s.ExpiresAt = &expires
-	s.Active = true
+	s.Status = StatusActive
 	s.CanceledAt = nil
 	s.GraceUntil = nil
 	return nil

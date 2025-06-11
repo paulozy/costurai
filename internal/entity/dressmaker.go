@@ -22,13 +22,13 @@ type Dressmaker struct {
 	Email    string `json:"email"`
 	Password string `json:"-"`
 
-	Name         string        `json:"name"`
-	Contact      string        `json:"contact"`
-	Enabled      bool          `json:"enabled"`
-	Grade        float64       `json:"grade"`
-	Services     []string      `json:"services"`
-	Address      Address       `json:"address"`
-	Subscription *Subscription `json:"subscription"`
+	Name           string   `json:"name"`
+	Contact        string   `json:"contact"`
+	Enabled        bool     `json:"enabled"`
+	Grade          float64  `json:"grade"`
+	Services       []string `json:"services"`
+	SubscriptionId *string  `json:"subscriptionId"`
+	Address        Address  `json:"address"`
 
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -80,6 +80,10 @@ func (dressmaker *Dressmaker) Enable() {
 
 func (dressmaker *Dressmaker) Disable() {
 	dressmaker.Enabled = false
+}
+
+func (dressmaker *Dressmaker) AddSubscription(sub *Subscription) {
+	dressmaker.SubscriptionId = &sub.ID
 }
 
 func (dressmaker *Dressmaker) UpdateGrade(grade float64) {
