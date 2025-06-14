@@ -2,41 +2,59 @@ package server
 
 import (
 	"cloud.google.com/go/firestore"
+	"github.com/paulozy/costurai/configs"
 	"github.com/paulozy/costurai/internal/infra/database/firestore/repositories"
 	"github.com/paulozy/costurai/internal/infra/server/controllers"
+	paymentServices "github.com/paulozy/costurai/internal/infra/services/payment"
 	services "github.com/paulozy/costurai/internal/infra/services/sms"
-	usecases "github.com/paulozy/costurai/internal/usecase"
 	authUseCases "github.com/paulozy/costurai/internal/usecase/auth"
+	dressmakerUseCases "github.com/paulozy/costurai/internal/usecase/dressmaker"
+	subUseCases "github.com/paulozy/costurai/internal/usecase/subscription"
+	userUseCases "github.com/paulozy/costurai/internal/usecase/user"
 )
 
 var Routes = []Handler{}
 
 func PopulateRoutes(db *firestore.Client) []Handler {
+	cfg, err := configs.LoadConfig("../../..")
+	if err != nil {
+		panic(err)
+	}
+	paymentServices.InitStripe(cfg.StripeSecretKey)
+	paymentServices.InitWebhook(cfg.StripeWebhookSecret)
+	stripeController := controllers.NewStripeController(
+		repositories.NewFirestoreSubscriptionRepository(db),
+		repositories.NewFirestoreDressmakerRepository(db),
+	)
+	Routes = append(Routes, Handler{
+		Path:   "/stripe/webhook",
+		Method: "POST",
+		Func:   stripeController.HandleWebhook,
+		Auth:   false,
+	})
 	addDressmakerRoutes(db)
 	addUserRoutes(db)
+	addSubscriptionRoutes(db, cfg)
 	addAuthRoutes(db)
 	return Routes
 }
 
 func addDressmakerRoutes(db *firestore.Client) {
-	dressMakerRepository := repositories.NewFirestoreDressmakerRepository(db)
-	dressMakerReviewsRepository := repositories.NewFirestoreReviewsRepository(db)
+	dressmakerRepository := repositories.NewFirestoreDressmakerRepository(db)
 
-	createDressmakerUseCase := usecases.NewCreateDressMakerUseCase(dressMakerRepository)
-	updateDressmakerUseCase := usecases.NewUpdateDressMakerUseCase(dressMakerRepository)
-	getDressmakersByProximityUseCase := usecases.NewGetDressmakersByProximityUseCase(dressMakerRepository)
-	showDressmakerUseCase := usecases.NewShowDressMakerUseCase(dressMakerRepository)
-	addDressmakerReviewUseCase := usecases.NewAddDressmakerReviewUseCase(dressMakerRepository, dressMakerReviewsRepository)
+	createDressmakerUseCase := dressmakerUseCases.NewCreateDressMakerUseCase(dressmakerRepository)
+	updateDressmakerUseCase := dressmakerUseCases.NewUpdateDressMakerUseCase(dressmakerRepository)
+	getDressmakersByProximityUseCase := dressmakerUseCases.NewGetDressmakersByProximityUseCase(dressmakerRepository)
+	showDressmakerUseCase := dressmakerUseCases.NewShowDressMakerUseCase(dressmakerRepository)
 
 	dressmakerUseCases := controllers.DressmakerUseCasesInput{
 		CreateDressmakerUseCase:          createDressmakerUseCase,
 		UpdateDressmakerUseCase:          updateDressmakerUseCase,
 		GetDressmakersByProximityUseCase: getDressmakersByProximityUseCase,
-		AddDressmakerReviewUseCase:       addDressmakerReviewUseCase,
 		ShowDressmakerUseCase:            showDressmakerUseCase,
 	}
 
-	dressmakerController := controllers.NewDressmakerController(dressMakerRepository, nil, dressmakerUseCases)
+	dressmakerController := controllers.NewDressmakerController(dressmakerRepository, nil, dressmakerUseCases)
 
 	dressmakerControllerRoutes := []Handler{
 		{
@@ -60,12 +78,6 @@ func addDressmakerRoutes(db *firestore.Client) {
 			Auth:   true,
 			Func:   dressmakerController.UpdateDressmaker,
 		},
-		{
-			Path:   "/dressmakers/reviews",
-			Method: "POST",
-			Auth:   true,
-			Func:   dressmakerController.AddDressmakerReview,
-		},
 	}
 
 	Routes = append(Routes, dressmakerControllerRoutes...)
@@ -74,7 +86,7 @@ func addDressmakerRoutes(db *firestore.Client) {
 func addUserRoutes(db *firestore.Client) {
 	userRepository := repositories.NewFirestoreUserRepository(db)
 
-	createUserUseCase := usecases.NewCreateUserUseCase(userRepository)
+	createUserUseCase := userUseCases.NewCreateUserUseCase(userRepository)
 
 	userUseCases := controllers.UserUseCasesInput{
 		CreateUserUseCase: createUserUseCase,
@@ -156,4 +168,34 @@ func addAuthRoutes(db *firestore.Client) {
 	}
 
 	Routes = append(Routes, authHandlers...)
+}
+
+func addSubscriptionRoutes(db *firestore.Client, cfg *configs.Config) {
+	dressmakerRepository := repositories.NewFirestoreDressmakerRepository(db)
+	subscriptionRepository := repositories.NewFirestoreSubscriptionRepository(db)
+	stripePayment := paymentServices.NewStripeService()
+
+	createSubscriptionUseCase := subUseCases.NewCreateSubscriptionUseCase(
+		subscriptionRepository,
+		dressmakerRepository,
+		stripePayment,
+		cfg,
+	)
+	subsUseCases := controllers.SubscriptionUseCasesInput{
+		CreateSubscriptionUseCase: createSubscriptionUseCase,
+	}
+	subscriptionController := controllers.NewSubscriptionController(
+		dressmakerRepository,
+		subscriptionRepository,
+		subsUseCases,
+	)
+	subsControllerRoutes := []Handler{
+		{
+			Path:   "/subscriptions",
+			Method: "POST",
+			Auth:   true,
+			Func:   subscriptionController.CreateSubscription,
+		},
+	}
+	Routes = append(Routes, subsControllerRoutes...)
 }

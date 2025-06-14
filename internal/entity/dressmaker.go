@@ -8,40 +8,65 @@ import (
 	"github.com/paulozy/costurai/pkg"
 )
 
+type Address struct {
+	City         string   `json:"city"`
+	State        string   `json:"state"`
+	Neighborhood string   `json:"neighborhood"`
+	Street       string   `json:"street"`
+	Number       string   `json:"number"`
+	Location     Location `json:"location"`
+}
+
 type Dressmaker struct {
 	ID       string `json:"id"`
 	Email    string `json:"email"`
 	Password string `json:"-"`
 
-	Name     string   `json:"name"`
-	Contact  string   `json:"contact"`
-	Enabled  bool     `json:"enabled"`
-	Grade    float64  `json:"grade"`
-	Services []string `json:"services"`
-	Location Location `json:"location"`
-	Reviews  []Review `json:"reviews"`
+	Name           string   `json:"name"`
+	Contact        string   `json:"contact"`
+	Enabled        bool     `json:"enabled"`
+	Grade          float64  `json:"grade"`
+	Services       []string `json:"services"`
+	SubscriptionId *string  `json:"subscriptionId"`
+	Address        Address  `json:"address"`
 
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-func NewDressmaker(email, password, name, contact string, location Location, services []string) (*Dressmaker, error) {
-	passHash, err := pkg.Encrypt(password)
+type CreateDressmakerInput struct {
+	Email    string   `json:"email"`
+	Password string   `json:"password"`
+	Name     string   `json:"name"`
+	Contact  string   `json:"contact"`
+	Services []string `json:"services"`
+	Address  Address  `json:"address"`
+}
+
+type UpdateDressmakerInput struct {
+	ID       string   `json:"id"`
+	Name     string   `json:"name,omitempty"`
+	Contact  string   `json:"contact,omitempty"`
+	Address  Address  `json:"address,omitempty"`
+	Services []string `json:"services,omitempty"`
+}
+
+func NewDressmaker(params CreateDressmakerInput) (*Dressmaker, error) {
+	passHash, err := pkg.Encrypt(params.Password)
 	if err != nil {
 		return nil, err
 	}
 
 	dressmaker := &Dressmaker{
 		ID:        uuid.New().String(),
-		Email:     email,
+		Email:     params.Email,
 		Password:  string(passHash),
-		Name:      name,
-		Contact:   contact,
-		Location:  location,
-		Services:  services,
+		Name:      params.Name,
+		Contact:   params.Contact,
+		Services:  params.Services,
 		Grade:     0,
 		Enabled:   false,
-		Reviews:   []Review{},
+		Address:   params.Address,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
@@ -57,36 +82,40 @@ func (dressmaker *Dressmaker) Disable() {
 	dressmaker.Enabled = false
 }
 
-func (dressmaker *Dressmaker) AddReview(review Review) {
-	dressmaker.Reviews = append(dressmaker.Reviews, review)
-	dressmaker.UpdateGrade(dressmaker.calculateGrade())
+func (dressmaker *Dressmaker) AddSubscription(sub *Subscription) {
+	dressmaker.SubscriptionId = &sub.ID
 }
 
 func (dressmaker *Dressmaker) UpdateGrade(grade float64) {
 	dressmaker.Grade = grade
 }
 
-func (dressmaker *Dressmaker) UpdateLocation(location Location) {
-	dressmaker.Location = location
-}
-
-func (dressmaker *Dressmaker) UpdateDressmaker(name, contact string, location Location, services []string) {
-	dressmaker.Name = name
-	dressmaker.Contact = contact
-	dressmaker.Location = location
-	dressmaker.Services = services
+func (dressmaker *Dressmaker) Update(params UpdateDressmakerInput) {
+	if params.Name != "" {
+		dressmaker.Name = params.Name
+	}
+	if params.Contact != "" {
+		dressmaker.Contact = params.Contact
+	}
+	// Check if Address is not the zero value
+	if (params.Address != Address{}) {
+		dressmaker.Address = params.Address
+	}
+	if params.Services != nil && len(params.Services) > 0 {
+		dressmaker.Services = params.Services
+	}
 	dressmaker.UpdatedAt = time.Now()
 }
 
-func (dressmaker *Dressmaker) calculateGrade() float64 {
-	if len(dressmaker.Reviews) == 0 {
+func (dressmaker *Dressmaker) CalculateGrade(reviews []Review) float64 {
+	if len(reviews) == 0 {
 		return 0
 	}
 
 	totalGrade := 0.0
-	for _, review := range dressmaker.Reviews {
+	for _, review := range reviews {
 		totalGrade += review.Grade
 	}
 
-	return math.Round(totalGrade / float64(len(dressmaker.Reviews)))
+	return math.Round(totalGrade / float64(len(reviews)))
 }

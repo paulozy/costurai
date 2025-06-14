@@ -9,6 +9,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/google/uuid v1.6.0
 	github.com/spf13/viper v1.18.2
+	github.com/stripe/stripe-go/v82 v82.1.0
 	github.com/twilio/twilio-go v1.26.1
 	golang.org/x/crypto v0.31.0
 	google.golang.org/api v0.214.0

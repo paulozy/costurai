@@ -114,8 +114,8 @@ func (r *FirestoreDressmakerRepository) FindByProximity(latitude, longitude floa
 		dist := pkg.HaversineDistance(
 			latitude,
 			longitude,
-			dressmaker.Location.Latitude,
-			dressmaker.Location.Longitude,
+			dressmaker.Address.Location.Latitude,
+			dressmaker.Address.Location.Longitude,
 		)
 
 		if dist <= float64(maxDistance) {
@@ -141,16 +141,23 @@ func (r *FirestoreDressmakerRepository) Update(dressmaker *entity.Dressmaker) er
 
 	_, err = dressmakerRef.Set(*r.Ctx, map[string]interface{}{
 		"Name":    dressmaker.Name,
+		"Email":   dressmaker.Email,
 		"Contact": dressmaker.Contact,
-		"Location": map[string]float64{
-			"Latitude":  dressmaker.Location.Latitude,
-			"Longitude": dressmaker.Location.Longitude,
+		"Address": map[string]interface{}{
+			"Street": dressmaker.Address.Street,
+			"Number": dressmaker.Address.Number,
+			"City":   dressmaker.Address.City,
+			"State":  dressmaker.Address.State,
+			"Location": map[string]float64{
+				"Latitude":  dressmaker.Address.Location.Latitude,
+				"Longitude": dressmaker.Address.Location.Longitude,
+			},
 		},
-		"Reviews":    dressmaker.Reviews,
-		"Services":   dressmaker.Services,
-		"Grade":      dressmaker.Grade,
-		"Enabled":    dressmaker.Enabled,
-		"Updated_at": dressmaker.UpdatedAt,
+		"Services":  dressmaker.Services,
+		"Grade":     dressmaker.Grade,
+		"Enabled":   dressmaker.Enabled,
+		"CreatedAt": dressmaker.CreatedAt,
+		"UpdatedAt": dressmaker.UpdatedAt,
 	}, firestore.MergeAll)
 
 	return err
