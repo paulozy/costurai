@@ -16,12 +16,10 @@ const (
 )
 
 type Subscription struct {
-	ID           string      `json:"id"`
-	DressmakerID string      `json:"dressmakerId"`
-	Plan         Plan        `json:"plan"` // padrão fixo: "standard", "pro"
-	Price        Price       `json:"price"`
-	Periodicity  Periodicity `json:"periodicity"`
-	Status       Status      `json:"status"`
+	ID           string `json:"id"`
+	DressmakerID string `json:"dressmakerId"`
+	Plan         Plan   `json:"plan"` // padrão fixo: "standard", "pro"
+	Status       Status `json:"status"`
 
 	StartedAt  *time.Time `json:"startedAt"`
 	ExpiresAt  *time.Time `json:"expiresAt,omitempty"`
@@ -35,11 +33,11 @@ type Subscription struct {
 }
 
 func NewSubscription(dressmakerID string, plan Plan) (*Subscription, error) {
-	if plan.Name.PlanType == "" {
+	if plan.Name == "" {
 		return nil, fmt.Errorf("plan type is required")
 	}
 
-	duration, err := durationForPeriodicity(plan.Periodicity.PeriodicityType)
+	duration, err := durationForPeriodicity(plan.Periodicity)
 	if err != nil {
 		return nil, err
 	}
@@ -93,12 +91,12 @@ func (s *Subscription) Cancel(gracePeriodDays int) {
 }
 
 func (s *Subscription) Renew() error {
-	if s.Periodicity.PeriodicityType == "" {
+	if s.Plan.Periodicity == "" {
 		return fmt.Errorf("periodicity type undefined")
 	}
 
 	var duration time.Duration
-	switch s.Periodicity.PeriodicityType {
+	switch s.Plan.Periodicity {
 	case MonthlyPeriodicity:
 		duration = 30 * 24 * time.Hour
 	case YearlyPeriodicity:

@@ -7,21 +7,24 @@ import (
 )
 
 type AuthDressmakerUseCase struct {
-	DressMakerRepository database.DressmakerRepositoryInterface
+	DressmakerRepository   database.DressmakerRepositoryInterface
+	SubscriptionRepository database.SubscriptionRepositoryInterface
 }
 
 type NewAuthDressmakerUseCaseInput struct {
-	DressmakerRepository database.DressmakerRepositoryInterface
+	DressmakerRepository   database.DressmakerRepositoryInterface
+	SubscriptionRepository database.SubscriptionRepositoryInterface
 }
 
 func NewDressmakerAuthenticationUseCase(repositories NewAuthDressmakerUseCaseInput) *AuthDressmakerUseCase {
 	return &AuthDressmakerUseCase{
-		DressMakerRepository: repositories.DressmakerRepository,
+		DressmakerRepository:   repositories.DressmakerRepository,
+		SubscriptionRepository: repositories.SubscriptionRepository,
 	}
 }
 
-func (useCase *AuthDressmakerUseCase) Execute(data dtos.AuthenticationInput) (dtos.AuthDressmakerOutput, pkg.Error) {
-	dressmakerExists, err := useCase.DressMakerRepository.Exists(data.Email)
+func (uc *AuthDressmakerUseCase) Execute(data dtos.AuthenticationInput) (dtos.AuthDressmakerOutput, pkg.Error) {
+	dressmakerExists, err := uc.DressmakerRepository.Exists(data.Email)
 	if err != nil {
 		return dtos.AuthDressmakerOutput{}, pkg.NewInternalServerError(err)
 	}
@@ -30,9 +33,17 @@ func (useCase *AuthDressmakerUseCase) Execute(data dtos.AuthenticationInput) (dt
 		return dtos.AuthDressmakerOutput{}, pkg.NewInvalidCredentialsError()
 	}
 
-	dressmaker, err := useCase.DressMakerRepository.FindByEmail(data.Email)
+	dressmaker, err := uc.DressmakerRepository.FindByEmail(data.Email)
 	if err != nil {
 		return dtos.AuthDressmakerOutput{}, pkg.NewInternalServerError(err)
+	}
+
+	if dressmaker.SubscriptionId != nil {
+		subscription, err := uc.SubscriptionRepository.FindByID(*dressmaker.SubscriptionId)
+		if err != nil {
+			return dtos.AuthDressmakerOutput{}, pkg.NewInternalServerError(err)
+		}
+		dressmaker.Subscription = subscription
 	}
 
 	isValidPass := pkg.CompareHashAndPassword(dressmaker.Password, data.Password)

@@ -41,11 +41,12 @@ func PopulateRoutes(db *firestore.Client) []Handler {
 
 func addDressmakerRoutes(db *firestore.Client) {
 	dressmakerRepository := repositories.NewFirestoreDressmakerRepository(db)
+	subscriptionRepository := repositories.NewFirestoreSubscriptionRepository(db)
 
 	createDressmakerUseCase := dressmakerUseCases.NewCreateDressMakerUseCase(dressmakerRepository)
 	updateDressmakerUseCase := dressmakerUseCases.NewUpdateDressMakerUseCase(dressmakerRepository)
 	getDressmakersByProximityUseCase := dressmakerUseCases.NewGetDressmakersByProximityUseCase(dressmakerRepository)
-	showDressmakerUseCase := dressmakerUseCases.NewShowDressMakerUseCase(dressmakerRepository)
+	showDressmakerUseCase := dressmakerUseCases.NewShowDressmakerUseCase(dressmakerRepository, subscriptionRepository)
 
 	dressmakerUseCases := controllers.DressmakerUseCasesInput{
 		CreateDressmakerUseCase:          createDressmakerUseCase,
@@ -107,10 +108,12 @@ func addUserRoutes(db *firestore.Client) {
 
 func addAuthRoutes(db *firestore.Client) {
 	dressmakerRepository := repositories.NewFirestoreDressmakerRepository(db)
+	subscriptionRepository := repositories.NewFirestoreSubscriptionRepository(db)
 	userRepository := repositories.NewFirestoreUserRepository(db)
 
 	authDressmakerUseCase := authUseCases.NewDressmakerAuthenticationUseCase(authUseCases.NewAuthDressmakerUseCaseInput{
-		DressmakerRepository: dressmakerRepository,
+		DressmakerRepository:   dressmakerRepository,
+		SubscriptionRepository: subscriptionRepository,
 	})
 	authUserUseCase := authUseCases.NewUserAuthUseCase(authUseCases.NewAuthUserUseCaseInput{
 		UserRepository: userRepository,

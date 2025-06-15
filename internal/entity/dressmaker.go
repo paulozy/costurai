@@ -22,13 +22,14 @@ type Dressmaker struct {
 	Email    string `json:"email"`
 	Password string `json:"-"`
 
-	Name           string   `json:"name"`
-	Contact        string   `json:"contact"`
-	Enabled        bool     `json:"enabled"`
-	Grade          float64  `json:"grade"`
-	Services       []string `json:"services"`
-	SubscriptionId *string  `json:"subscriptionId"`
-	Address        Address  `json:"address"`
+	Name           string        `json:"name"`
+	Contact        string        `json:"contact"`
+	Enabled        bool          `json:"enabled"`
+	Grade          float64       `json:"grade"`
+	Services       []string      `json:"services"`
+	SubscriptionId *string       `json:"subscriptionId"`
+	Subscription   *Subscription `json:"subscription,omitempty"`
+	Address        Address       `json:"address"`
 
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`

@@ -33,15 +33,22 @@ func (r *FirestoreSubscriptionRepository) Create(subscription *entity.Subscripti
 }
 
 func (r *FirestoreSubscriptionRepository) FindByID(id string) (*entity.Subscription, error) {
-	doc, err := r.Subscriptions.Doc(id).Get(*r.Ctx)
+	query := r.Subscriptions.Where("ID", "==", id).Limit(1)
+	docs, err := query.Documents(*r.Ctx).GetAll()
 	if err != nil {
 		return nil, err
 	}
-	var sub entity.Subscription
-	if err := doc.DataTo(&sub); err != nil {
+
+	if len(docs) == 0 {
+		return nil, nil
+	}
+
+	var subscription entity.Subscription
+	err = docs[0].DataTo(&subscription)
+	if err != nil {
 		return nil, err
 	}
-	return &sub, nil
+	return &subscription, nil
 }
 
 func (r *FirestoreSubscriptionRepository) Update(subscription *entity.Subscription) error {

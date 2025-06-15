@@ -6,25 +6,38 @@ import (
 	"github.com/paulozy/costurai/pkg"
 )
 
-type ShowDressMakerUseCase struct {
-	DressMakerRepository database.DressmakerRepositoryInterface
+type ShowDressmakerUseCase struct {
+	DressmakerRepository   database.DressmakerRepositoryInterface
+	SubscriptionRepository database.SubscriptionRepositoryInterface
 }
 
-func NewShowDressMakerUseCase(repo database.DressmakerRepositoryInterface) *ShowDressMakerUseCase {
-	return &ShowDressMakerUseCase{
-		DressMakerRepository: repo,
+func NewShowDressmakerUseCase(
+	repo database.DressmakerRepositoryInterface,
+	subscriptionRepo database.SubscriptionRepositoryInterface,
+) *ShowDressmakerUseCase {
+	return &ShowDressmakerUseCase{
+		DressmakerRepository:   repo,
+		SubscriptionRepository: subscriptionRepo,
 	}
 }
 
-type ShowDressMakerInput struct {
+type ShowDressmakerInput struct {
 	ID string `json:"id"`
 }
 
-func (uc *ShowDressMakerUseCase) Execute(input ShowDressMakerInput) (*entity.Dressmaker, pkg.Error) {
-	dressMaker, err := uc.DressMakerRepository.FindByID(input.ID)
+func (uc *ShowDressmakerUseCase) Execute(input ShowDressmakerInput) (*entity.Dressmaker, pkg.Error) {
+	dressmaker, err := uc.DressmakerRepository.FindByID(input.ID)
 	if err != nil {
 		return nil, pkg.NewInternalServerError(err)
 	}
 
-	return dressMaker, pkg.Error{}
+	if dressmaker.SubscriptionId != nil {
+		subscription, err := uc.SubscriptionRepository.FindByID(*dressmaker.SubscriptionId)
+		if err != nil {
+			return nil, pkg.NewInternalServerError(err)
+		}
+		dressmaker.Subscription = subscription
+	}
+
+	return dressmaker, pkg.Error{}
 }

@@ -16,14 +16,14 @@ type DressmakerController struct {
 	createDressmakerUseCase          *usecases.CreateDressMakerUseCase
 	updateDressmakerUseCase          *usecases.UpdateDressMakerUseCase
 	getDressmakersByProximityUseCase *usecases.GetDressmakersByProximityUseCase
-	showDressmakerUseCase            *usecases.ShowDressMakerUseCase
+	showDressmakerUseCase            *usecases.ShowDressmakerUseCase
 }
 
 type DressmakerUseCasesInput struct {
 	CreateDressmakerUseCase          *usecases.CreateDressMakerUseCase
 	UpdateDressmakerUseCase          *usecases.UpdateDressMakerUseCase
 	GetDressmakersByProximityUseCase *usecases.GetDressmakersByProximityUseCase
-	ShowDressmakerUseCase            *usecases.ShowDressMakerUseCase
+	ShowDressmakerUseCase            *usecases.ShowDressmakerUseCase
 }
 
 func NewDressmakerController(dmRepo database.DressmakerRepositoryInterface, dmrRepo database.DressmakerReviewsRepositoryInterface, usecases DressmakerUseCasesInput) *DressmakerController {
@@ -107,7 +107,7 @@ func (dc *DressmakerController) GetDressmakers(c *gin.Context) {
 }
 
 func (dc *DressmakerController) GetDressmaker(c *gin.Context) {
-	var input usecases.ShowDressMakerInput
+	var input usecases.ShowDressmakerInput
 
 	ID := c.Param("id")
 	input.ID = ID

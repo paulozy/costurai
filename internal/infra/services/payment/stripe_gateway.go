@@ -103,7 +103,7 @@ func (s *StripeService) createInlineCheckoutSession(req PaymentPayload) (string,
 
 func (s *StripeService) getStripePriceID(plan entity.Plan) (string, error) {
 	productName := s.getProductName(plan)
-	interval := string(plan.Periodicity.PeriodicityType) // "monthly" or "yearly"
+	interval := string(plan.Periodicity) // "monthly" or "yearly"
 
 	productList := &stripe.ProductListParams{
 		Active: stripe.Bool(true),
@@ -132,14 +132,14 @@ func (s *StripeService) getStripePriceID(plan entity.Plan) (string, error) {
 func (s *StripeService) getProductName(plan entity.Plan) string {
 	var productName string
 
-	isStandardMonthly := plan.Name.PlanType == entity.PlanTypeStandard &&
-		plan.Periodicity.PeriodicityType == entity.MonthlyPeriodicity
+	isStandardMonthly := plan.Name == entity.PlanTypeStandard &&
+		plan.Periodicity == entity.MonthlyPeriodicity
 
-	isStandardYearly := plan.Name.PlanType == entity.PlanTypeStandard &&
-		plan.Periodicity.PeriodicityType == entity.YearlyPeriodicity
+	isStandardYearly := plan.Name == entity.PlanTypeStandard &&
+		plan.Periodicity == entity.YearlyPeriodicity
 
-	isProMonthly := plan.Name.PlanType == entity.PlanTypePro &&
-		plan.Periodicity.PeriodicityType == entity.MonthlyPeriodicity
+	isProMonthly := plan.Name == entity.PlanTypePro &&
+		plan.Periodicity == entity.MonthlyPeriodicity
 
 	if isStandardMonthly {
 		productName = "Inscrição Standard - Mensal"
@@ -154,8 +154,8 @@ func (s *StripeService) getProductName(plan entity.Plan) string {
 	return productName
 }
 
-func (s *StripeService) getInterval(periodicity entity.Periodicity) string {
-	switch periodicity.PeriodicityType {
+func (s *StripeService) getInterval(periodicity entity.PeriodicityType) string {
+	switch periodicity {
 	case entity.MonthlyPeriodicity:
 		return "month"
 	case entity.YearlyPeriodicity:

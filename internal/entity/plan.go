@@ -17,18 +17,10 @@ const (
 	PlanTypePro      PlanType = "pro"
 )
 
-type Type struct {
-	PlanType PlanType
-}
-
 const (
 	MonthlyPeriodicity PeriodicityType = "monthly"
 	YearlyPeriodicity  PeriodicityType = "yearly"
 )
-
-type Periodicity struct {
-	PeriodicityType PeriodicityType
-}
 
 type Price struct {
 	Amount    int32  `json:"amount"`
@@ -37,9 +29,9 @@ type Price struct {
 }
 
 type Plan struct {
-	Name        Type        `json:"name"`
-	Price       Price       `json:"price"`
-	Periodicity Periodicity `json:"periodicity"`
+	Name        PlanType        `json:"name"`
+	Price       Price           `json:"price"`
+	Periodicity PeriodicityType `json:"periodicity"`
 }
 
 // Definition of Builder
@@ -56,12 +48,12 @@ func NewPlanBuilder() *PlanBuilder {
 }
 
 func (builder *PlanBuilder) WithType(planType PlanType) *PlanBuilder {
-	builder.plan.Name = Type{PlanType: planType}
+	builder.plan.Name = planType
 	return builder
 }
 
 func (builder *PlanBuilder) WithPeriodicity(p PeriodicityType) *PlanBuilder {
-	builder.plan.Periodicity = Periodicity{PeriodicityType: p}
+	builder.plan.Periodicity = p
 	return builder
 }
 
@@ -78,10 +70,10 @@ func (b *PlanBuilder) Build() (Plan, error) {
 	if b.err != nil {
 		return Plan{}, b.err
 	}
-	if b.plan.Name.PlanType == "" {
+	if b.plan.Name == "" {
 		return Plan{}, fmt.Errorf("plan type is required")
 	}
-	if b.plan.Periodicity.PeriodicityType == "" {
+	if b.plan.Periodicity == "" {
 		return Plan{}, fmt.Errorf("periodicity is required")
 	}
 	if b.plan.Price.Currency == "" {

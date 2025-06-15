@@ -36,12 +36,14 @@ func (sc *StripeController) HandleWebhook(c *gin.Context) {
 		c.String(http.StatusBadRequest, fmt.Sprintf("could not read request body: %v", err))
 		return
 	}
+
 	sigHeader := c.GetHeader("Stripe-Signature")
 	event, err := webhook.ConstructEvent(payload, sigHeader, paymentServices.WebhookSecret)
 	if err != nil {
 		c.String(http.StatusBadRequest, fmt.Sprintf("webhook signature verification failed: %v", err))
 		return
 	}
+
 	switch event.Type {
 	case stripe.EventTypeCheckoutSessionCompleted:
 		var sess stripe.CheckoutSession
