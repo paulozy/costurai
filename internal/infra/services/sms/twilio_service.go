@@ -16,7 +16,7 @@ type TwilioService struct {
 }
 
 func NewTwilioService() *TwilioService {
-	configs, _ := configs.LoadConfig("../../../../")
+	configs, _ := configs.LoadConfig(configs.Env)
 
 	params := twilio.ClientParams{
 		Username: configs.TwilioSID,

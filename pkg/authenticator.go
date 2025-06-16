@@ -48,7 +48,7 @@ func ParseToken(tokenString string) (*jwt.Token, error) {
 }
 
 func getJWTSecretKey() string {
-	config, err := configs.LoadConfig("../")
+	config, err := configs.LoadConfig(configs.Env)
 	if err != nil {
 		panic(err)
 	}
@@ -57,7 +57,7 @@ func getJWTSecretKey() string {
 }
 
 func getJWTExpiration() int64 {
-	config, err := configs.LoadConfig("../")
+	config, err := configs.LoadConfig(configs.Env)
 	if err != nil {
 		panic(err)
 	}

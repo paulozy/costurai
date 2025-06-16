@@ -17,15 +17,15 @@ const (
 func main() {
 	fmt.Println("Starting the Costurai API server...")
 
-	env := "development"
+	var env *string
 	if len(os.Args) > 1 {
-		env = os.Args[1]
-	}
-	if env != "local" && env != "development" && env != "production" {
-		panic(fmt.Sprintf("Invalid environment: %s. Allowed values are 'local', 'development', or 'production'.", env))
+		env = &os.Args[1]
+	} else {
+		env = new(string)
+		*env = "local"
 	}
 
-	configs, err := configs.LoadConfig(env)
+	configs, err := configs.LoadConfig(*env)
 	if err != nil {
 		panic(err)
 	}

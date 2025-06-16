@@ -16,7 +16,7 @@ import (
 var Routes = []Handler{}
 
 func PopulateRoutes(db *firestore.Client) []Handler {
-	cfg, err := configs.LoadConfig("../../..")
+	cfg, err := configs.LoadConfig(configs.Env)
 	if err != nil {
 		panic(err)
 	}

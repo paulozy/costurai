@@ -153,11 +153,12 @@ func (r *FirestoreDressmakerRepository) Update(dressmaker *entity.Dressmaker) er
 				"Longitude": dressmaker.Address.Location.Longitude,
 			},
 		},
-		"Services":  dressmaker.Services,
-		"Grade":     dressmaker.Grade,
-		"Enabled":   dressmaker.Enabled,
-		"CreatedAt": dressmaker.CreatedAt,
-		"UpdatedAt": dressmaker.UpdatedAt,
+		"Services":       dressmaker.Services,
+		"Grade":          dressmaker.Grade,
+		"SubscriptionId": dressmaker.SubscriptionId,
+		"Enabled":        dressmaker.Enabled,
+		"CreatedAt":      dressmaker.CreatedAt,
+		"UpdatedAt":      dressmaker.UpdatedAt,
 	}, firestore.MergeAll)
 
 	return err

@@ -33,7 +33,10 @@ type Config struct {
 	Env                       string `mapstructure:"ENV"`
 }
 
+var Env string
+
 func LoadConfig(env string) (*Config, error) {
+	Env = env
 	cfg := &Config{} // Inicialize a struct
 
 	if env == "local" {
