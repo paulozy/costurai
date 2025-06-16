@@ -1,8 +1,6 @@
 package configs
 
 import (
-	"os"
-
 	"github.com/spf13/viper"
 )
 
@@ -31,13 +29,13 @@ type Config struct {
 	Env                       string `mapstructure:"ENV"`
 }
 
-func LoadConfig(path string) (*Config, error) {
+func LoadConfig(env string) (*Config, error) {
 	var cfg *Config
 
-	if os.Getenv("ENV") == "local" {
+	if env == "local" {
 		viper.SetConfigName("app_config")
 		viper.SetConfigType("env")
-		viper.AddConfigPath(path)
+		viper.AddConfigPath("../")
 		viper.SetConfigFile(".env")
 
 		err := viper.ReadInConfig()

@@ -26,5 +26,5 @@
   EXPOSE 8080
   
   # Run the compiled Go binary
-  CMD ["/app/main"]
+  CMD ["/app/main", "development"]
   
