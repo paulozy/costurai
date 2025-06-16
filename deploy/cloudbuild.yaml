@@ -22,11 +22,11 @@ steps:
     args:
       - 'run'
       - 'deploy'
-      - 'api-costurei' # Nome do seu serviço Cloud Run (o que você definiu no console)
+      - 'costurai-api-development' # Nome do seu serviço Cloud Run (o que você definiu no console)
       - '--image'
       - 'europe-west1-docker.pkg.dev/costurai-462917/cloud-run-source-deploy/costurai/costurai@sha256:2ddfac72403f7a31d6ad98776e9cee72b8e293ae32001cc8a94e2ed52ebdfae6' # <-- AQUI: Aponta para a imagem construída pelo Cloud Build
       - '--region'
-      - 'southamerica-east1' # Sua região do Cloud Run
+      - 'europe-west1' # Sua região do Cloud Run
       - '--platform'
       - 'managed'
       - '--allow-unauthenticated' # Mantenha se for API pública (ajuste se precisar de autenticação)
