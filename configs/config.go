@@ -2,6 +2,7 @@ package configs
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/viper"
 )
@@ -54,6 +55,13 @@ func LoadConfig(env string) (*Config, error) {
 	}
 
 	viper.AutomaticEnv()
+
+	// --- LOG DE DEPURACAO CRUCIAL 1: Verificando o que os.LookupEnv vê ---
+	firebaseProjectIDFromOS, foundOS := os.LookupEnv("FIREBASE_PROJECT_ID")
+	fmt.Printf("--- Debug OS Env Check ---\n")
+	fmt.Printf("os.LookupEnv(\"FIREBASE_PROJECT_ID\"): '%s', Found: %t\n", firebaseProjectIDFromOS, foundOS)
+	fmt.Printf("--- Fim Debug OS Env Check ---\n")
+
 	err := viper.Unmarshal(&cfg)
 	if err != nil {
 		panic(err)
