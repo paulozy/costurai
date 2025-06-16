@@ -5,7 +5,7 @@ steps:
     args:
       - 'build'
       - '-t'
-      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/costurai/costurai:$COMMIT_SHA' # <-- AQUI: Seu novo caminho completo
+      - 'europe-west1-docker.pkg.dev/costurai-462917/cloud-run-source-deploy/costurai/costurai@sha256:2ddfac72403f7a31d6ad98776e9cee72b8e293ae32001cc8a94e2ed52ebdfae6' # <-- AQUI: Seu novo caminho completo
       - '.'
 
   # Passo 2: Enviar a imagem para o Artifact Registry
@@ -13,7 +13,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args:
       - 'push'
-      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/costurai/costurai:$COMMIT_SHA' # <-- AQUI: Seu novo caminho completo
+      - 'europe-west1-docker.pkg.dev/costurai-462917/cloud-run-source-deploy/costurai/costurai@sha256:2ddfac72403f7a31d6ad98776e9cee72b8e293ae32001cc8a94e2ed52ebdfae6' # <-- AQUI: Seu novo caminho completo
 
   # Passo 3: Implantar a nova revisão da imagem no Cloud Run
   # Usamos a imagem que foi acabamos de enviar e a conta de serviço específica
@@ -24,7 +24,7 @@ steps:
       - 'deploy'
       - 'api-costurei' # Nome do seu serviço Cloud Run (o que você definiu no console)
       - '--image'
-      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/costurai/costurai:$COMMIT_SHA' # <-- AQUI: Aponta para a imagem construída pelo Cloud Build
+      - 'europe-west1-docker.pkg.dev/costurai-462917/cloud-run-source-deploy/costurai/costurai@sha256:2ddfac72403f7a31d6ad98776e9cee72b8e293ae32001cc8a94e2ed52ebdfae6' # <-- AQUI: Aponta para a imagem construída pelo Cloud Build
       - '--region'
       - 'southamerica-east1' # Sua região do Cloud Run
       - '--platform'
@@ -33,4 +33,4 @@ steps:
       - '--service-account=costurai-api-development@costurai-462917.iam.gserviceaccount.com' # Sua conta de serviço dedicada
 
 images:
-  - 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/costurai/costurai:$COMMIT_SHA' # <-- AQUI: Seu novo caminho completo para a imagem final
+  - 'europe-west1-docker.pkg.dev/costurai-462917/cloud-run-source-deploy/costurai/costurai@sha256:2ddfac72403f7a31d6ad98776e9cee72b8e293ae32001cc8a94e2ed52ebdfae6' # <-- AQUI: Seu novo caminho completo para a imagem final
