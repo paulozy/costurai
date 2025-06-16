@@ -16,7 +16,7 @@ const (
 func main() {
 	fmt.Println("Starting the Costurai API server...")
 
-	configs, err := configs.LoadConfig("../")
+	configs, err := configs.LoadConfig("./")
 	if err != nil {
 		panic(err)
 	}
