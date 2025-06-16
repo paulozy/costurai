@@ -39,16 +39,22 @@ func LoadConfig(path string) (*Config, error) {
 		viper.SetConfigType("env")
 		viper.AddConfigPath(path)
 		viper.SetConfigFile(".env")
+
+		err := viper.ReadInConfig()
+		if err != nil {
+			panic(err)
+		}
+
+		err = viper.Unmarshal(&cfg)
+		if err != nil {
+			panic(err)
+		}
+
+		return cfg, nil
 	}
 
 	viper.AutomaticEnv()
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		panic(err)
-	}
-
-	err = viper.Unmarshal(&cfg)
+	err := viper.Unmarshal(&cfg)
 	if err != nil {
 		panic(err)
 	}
