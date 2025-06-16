@@ -33,7 +33,7 @@ type Config struct {
 }
 
 func LoadConfig(env string) (*Config, error) {
-	var cfg *Config
+	cfg := &Config{}
 
 	if env == "local" {
 		viper.SetConfigName("app_config")
