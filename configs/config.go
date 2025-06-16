@@ -1,6 +1,8 @@
 package configs
 
 import (
+	"fmt"
+
 	"github.com/spf13/viper"
 )
 
@@ -56,6 +58,13 @@ func LoadConfig(env string) (*Config, error) {
 	if err != nil {
 		panic(err)
 	}
+
+	// --- LOG DE DEPURACAO CRUCIAL ---
+	fmt.Printf("--- Debug Config Load --- \n")
+	fmt.Printf("FirebaseProjectId (lido): %s\n", cfg.FirebaseProjectId)
+	fmt.Printf("WebPort (lido): %s\n", cfg.WebPort)
+	fmt.Printf("Env (lido): %s\n", cfg.Env)
+	fmt.Printf("--- Fim Debug Config Load ---\n")
 
 	return cfg, nil
 }
