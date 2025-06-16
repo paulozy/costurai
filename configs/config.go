@@ -18,7 +18,7 @@ type Config struct {
 	WebHost                   string `mapstructure:"WEB_HOST"`
 	JWTSecret                 string `mapstructure:"JWT_SECRET"`
 	JWTExpiresIn              int64  `mapstructure:"JWT_EXPIRES_IN"`
-	FirebaseProjectId         string `mapstructure:"FIREBASE_PROJECT_ID"`
+	FirebaseProjectId         string `mapstructure:"FIREBASE_PROJECT_ID"` // <--- O CAMPO EM QUESTÃO
 	TwilioSID                 string `mapstructure:"TWILIO_ACCOUNT_SID"`
 	TwilioAuthToken           string `mapstructure:"TWILIO_AUTH_TOKEN"`
 	TwilioSMSServiceSID       string `mapstructure:"TWILIO_SMS_SERVICE_SID"`
@@ -33,28 +33,34 @@ type Config struct {
 }
 
 func LoadConfig(env string) (*Config, error) {
-	cfg := &Config{}
+	cfg := &Config{} // Inicialize cfg para ser um ponteiro para uma nova Config
+
+	// --- ATIVAR MODO DE DEPURACAO DO VIPER (MUITO VERBOSO, REMOVER PARA PRODUCAO) ---
+	viper.Debug() // <<<--- ADICIONE ESTA LINHA
+	// viper.SetTypeByDefaultValue(true) // Pode ajudar com valores default, mas Debug é mais útil agora
 
 	if env == "local" {
 		viper.SetConfigName("app_config")
 		viper.SetConfigType("env")
 		viper.AddConfigPath("../")
-		viper.SetConfigFile(".env")
+		viper.SetConfigFile(".env") // Note: SetConfigFile overrides SetConfigName and AddConfigPath for the primary config file
 
 		err := viper.ReadInConfig()
 		if err != nil {
-			panic(err)
+			return nil, fmt.Errorf("erro ao ler app_config.env local: %w", err)
 		}
 
-		err = viper.Unmarshal(&cfg)
+		err = viper.Unmarshal(cfg) // Passe o ponteiro inicializado
 		if err != nil {
-			panic(err)
+			return nil, fmt.Errorf("erro ao decodificar config local: %w", err)
 		}
 
 		return cfg, nil
 	}
 
-	viper.AutomaticEnv()
+	// Caminho para "development", "production" (Cloud Run)
+	// --- AQUI É O PONTO CRÍTICO ---
+	viper.AutomaticEnv() // Diz ao Viper para ler variáveis de ambiente do SO
 
 	// --- LOG DE DEPURACAO CRUCIAL 1: Verificando o que os.LookupEnv vê ---
 	firebaseProjectIDFromOS, foundOS := os.LookupEnv("FIREBASE_PROJECT_ID")
@@ -62,17 +68,31 @@ func LoadConfig(env string) (*Config, error) {
 	fmt.Printf("os.LookupEnv(\"FIREBASE_PROJECT_ID\"): '%s', Found: %t\n", firebaseProjectIDFromOS, foundOS)
 	fmt.Printf("--- Fim Debug OS Env Check ---\n")
 
-	err := viper.Unmarshal(&cfg)
+	err := viper.Unmarshal(cfg) // <<<--- AQUI O VIPER DEVERIA PREENCHER cfg COM AS VARIAVEIS DE AMBIENTE
 	if err != nil {
-		panic(err)
+		// Se este erro for acionado, significa que a estrutura (cfg) ou o mapeamento tem um problema,
+		// não necessariamente que a variável está vazia, mas sim um erro de tipo ou de mapeamento.
+		return nil, fmt.Errorf("falha ao decodificar configurações do ambiente: %w", err)
 	}
 
-	// --- LOG DE DEPURACAO CRUCIAL ---
-	fmt.Printf("--- Debug Config Load --- \n")
-	fmt.Printf("FirebaseProjectId (lido): %s\n", cfg.FirebaseProjectId)
-	fmt.Printf("WebPort (lido): %s\n", cfg.WebPort)
-	fmt.Printf("Env (lido): %s\n", cfg.Env)
-	fmt.Printf("--- Fim Debug Config Load ---\n")
+	// --- LOG DE DEPURACAO CRUCIAL 2: Verificando o que Viper unmarshaled ---
+	fmt.Printf("--- Debug Config Load (via Viper) ---\n")
+	fmt.Printf("FirebaseProjectId (lido por Viper): '%s'\n", cfg.FirebaseProjectId)
+	fmt.Printf("WebPort (lido por Viper): '%s'\n", cfg.WebPort)
+	fmt.Printf("Env (lido por Viper): '%s'\n", cfg.Env)
+	fmt.Printf("--- Fim Debug Config Load (via Viper) ---\n")
+
+	// --- LOG DE DEPURACAO 3: DUMP COMPLETO DA STRUCT ---
+	// Isso vai mostrar o conteúdo de TODOS os campos da struct 'cfg' após o unmarshal.
+	fmt.Printf("--- Full Config Struct Dump ---\n")
+	fmt.Printf("%+v\n", cfg) // O '+v' mostra o nome do campo e o valor
+	fmt.Printf("--- End Full Config Struct Dump ---\n")
+
+	if cfg.FirebaseProjectId == "" {
+		// Isso é o que você está vendo. Se o Debug do Viper não mostrar o motivo,
+		// então consideraremos alternativas.
+		return nil, fmt.Errorf("FirebaseProjectId está vazio APÓS carregar a configuração (Viper não preencheu)")
+	}
 
 	return cfg, nil
 }
