@@ -23,7 +23,7 @@
   COPY --from=builder /app/main /app/main
   
   # Expose application ports
-  EXPOSE 3000 8000
+  EXPOSE 8080 8080
   
   # Run the compiled Go binary
   CMD ["/app/main"]

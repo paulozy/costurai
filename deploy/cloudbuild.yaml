@@ -1,0 +1,36 @@
+steps:
+  # Passo 1: Construir a imagem Docker da sua API Go
+  # O nome da imagem agora inclui o prefixo completo do Artifact Registry e o nome da imagem/repositório desejado
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/costurai/costurai:$COMMIT_SHA' # <-- AQUI: Seu novo caminho completo
+      - '.'
+
+  # Passo 2: Enviar a imagem para o Artifact Registry
+  # 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/costurai/costurai:$COMMIT_SHA' é a imagem que acabamos de construir
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/costurai/costurai:$COMMIT_SHA' # <-- AQUI: Seu novo caminho completo
+
+  # Passo 3: Implantar a nova revisão da imagem no Cloud Run
+  # Usamos a imagem que foi acabamos de enviar e a conta de serviço específica
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'api-costurei' # Nome do seu serviço Cloud Run (o que você definiu no console)
+      - '--image'
+      - 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/costurai/costurai:$COMMIT_SHA' # <-- AQUI: Aponta para a imagem construída pelo Cloud Build
+      - '--region'
+      - 'southamerica-east1' # Sua região do Cloud Run
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated' # Mantenha se for API pública (ajuste se precisar de autenticação)
+      - '--service-account=costurai-api-development@costurai-462917.iam.gserviceaccount.com' # Sua conta de serviço dedicada
+
+images:
+  - 'europe-west1-docker.pkg.dev/$PROJECT_ID/cloud-run-source-deploy/costurai/costurai:$COMMIT_SHA' # <-- AQUI: Seu novo caminho completo para a imagem final
