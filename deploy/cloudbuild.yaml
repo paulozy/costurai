@@ -31,6 +31,13 @@ steps:
       - 'managed'
       - '--allow-unauthenticated'
       - '--service-account=costurai-api-development@costurai-462917.iam.gserviceaccount.com'
+      - '--set-env-vars=FIREBASE_PROJECT_ID=costurai-f97f1,WEB_PORT=8080,WEB_HOST=0.0.0.0,ENV=development,DB_TYPE=firestore,SMS_TIMEOUT=5,PAYMENT_SUCCESS_REDIRECT_URL=/inscricao/sucesso,PAYMENT_CANCEL_REDIRECT_URL=/inscricao/cancelamento'
+      - '--set-secrets=JWT_SECRET=costurai-jwt-secret:latest'
+      - '--set-secrets=TWILIO_ACCOUNT_SID=costurai-twilio-account-sid:latest'
+      - '--set-secrets=TWILIO_AUTH_TOKEN=costurai-twilio-auth-token:latest'
+      - '--set-secrets=TWILIO_SMS_SERVICE_SID=costurai-twilio-sms-service-sid:latest'
+      - '--set-secrets=STRIPE_SECRET_KEY=costurai-stripe-secret-key:latest'
+      - '--set-secrets=STRIPE_WEBHOOK_SECRET=costurai-stripe-webhook-secret:latest'
 
 images:
   - 'europe-west1-docker.pkg.dev/costurai-462917/cloud-run-source-deploy/costurai/costurai@sha256:2ddfac72403f7a31d6ad98776e9cee72b8e293ae32001cc8a94e2ed52ebdfae6' # <-- AQUI: Seu novo caminho completo para a imagem final
