@@ -14,6 +14,7 @@ type Address struct {
 	Neighborhood string   `json:"neighborhood"`
 	Street       string   `json:"street"`
 	Number       string   `json:"number"`
+	Zipcode      string   `json:"zipcode"`
 	Location     Location `json:"location"`
 }
 

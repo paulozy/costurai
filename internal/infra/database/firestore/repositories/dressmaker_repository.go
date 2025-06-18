@@ -144,10 +144,11 @@ func (r *FirestoreDressmakerRepository) Update(dressmaker *entity.Dressmaker) er
 		"Email":   dressmaker.Email,
 		"Contact": dressmaker.Contact,
 		"Address": map[string]interface{}{
-			"Street": dressmaker.Address.Street,
-			"Number": dressmaker.Address.Number,
-			"City":   dressmaker.Address.City,
-			"State":  dressmaker.Address.State,
+			"Street":  dressmaker.Address.Street,
+			"Number":  dressmaker.Address.Number,
+			"City":    dressmaker.Address.City,
+			"State":   dressmaker.Address.State,
+			"Zipcode": dressmaker.Address.Zipcode,
 			"Location": map[string]float64{
 				"Latitude":  dressmaker.Address.Location.Latitude,
 				"Longitude": dressmaker.Address.Location.Longitude,
