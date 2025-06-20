@@ -29,6 +29,8 @@ func (uc *ShowDressmakerUseCase) Execute(input ShowDressmakerInput) (*entity.Dre
 	dressmaker, err := uc.DressmakerRepository.FindByID(input.ID)
 	if err != nil {
 		return nil, pkg.NewInternalServerError(err)
+	} else if dressmaker == nil {
+		return nil, pkg.NewNotFoundError("dressmaker")
 	}
 
 	if dressmaker.SubscriptionId != nil {
