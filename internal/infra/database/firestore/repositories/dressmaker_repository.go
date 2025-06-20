@@ -3,11 +3,11 @@ package repositories
 import (
 	"context"
 	"fmt"
+	"math"
 
 	"cloud.google.com/go/firestore"
 	"github.com/paulozy/costurai/internal/entity"
 	"github.com/paulozy/costurai/pkg"
-	"google.golang.org/api/iterator"
 )
 
 type FirestoreDressmakerRepository struct {
@@ -26,12 +26,7 @@ func NewFirestoreDressmakerRepository(db *firestore.Client) *FirestoreDressmaker
 
 func (r *FirestoreDressmakerRepository) Create(dressmaker *entity.Dressmaker) error {
 	_, err := r.Dressmakers.NewDoc().Create(*r.Ctx, dressmaker)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (r *FirestoreDressmakerRepository) FindByEmail(email string) (*entity.Dressmaker, error) {
@@ -90,26 +85,29 @@ func (r *FirestoreDressmakerRepository) FindByID(id string) (*entity.Dressmaker,
 }
 
 func (r *FirestoreDressmakerRepository) FindByProximity(latitude, longitude float64, maxDistance int) ([]entity.Dressmaker, error) {
-	iter := r.Dressmakers.Documents(*r.Ctx)
-	defer iter.Stop()
+	fmt.Println("maxDistance", maxDistance)
 
-	var dressmakers []entity.Dressmaker
+	minLat, maxLat, minLng, maxLng := getBoundingBox(latitude, longitude, float64(maxDistance))
 
-	for {
-		doc, err := iter.Next()
-		if err == iterator.Done {
-			break
-		}
+	query := r.Dressmakers.
+		Where("Enabled", "==", true).
+		Where("Address.Location.Latitude", ">=", minLat).
+		Where("Address.Location.Latitude", "<=", maxLat).
+		Where("Address.Location.Longitude", ">=", minLng).
+		Where("Address.Location.Longitude", "<=", maxLng)
+
+	docs, err := query.Documents(*r.Ctx).GetAll()
+	if err != nil {
+		return nil, err
+	}
+
+	dressmakers := make([]entity.Dressmaker, 0, 50)
+	for _, doc := range docs {
+		var dressmaker *entity.Dressmaker
+		err = doc.DataTo(&dressmaker)
 		if err != nil {
 			return nil, err
 		}
-
-		var dressmaker entity.Dressmaker
-		if err := doc.DataTo(&dressmaker); err != nil {
-			return nil, err
-		}
-
-		fmt.Printf("latitude: %.2f, longitude: %.2f", latitude, longitude)
 
 		dist := pkg.HaversineDistance(
 			latitude,
@@ -119,7 +117,7 @@ func (r *FirestoreDressmakerRepository) FindByProximity(latitude, longitude floa
 		)
 
 		if dist <= float64(maxDistance) {
-			dressmakers = append(dressmakers, dressmaker)
+			dressmakers = append(dressmakers, *dressmaker)
 		}
 	}
 
@@ -163,4 +161,18 @@ func (r *FirestoreDressmakerRepository) Update(dressmaker *entity.Dressmaker) er
 	}, firestore.MergeAll)
 
 	return err
+}
+
+func getBoundingBox(lat, lng, radiusMeters float64) (float64, float64, float64, float64) {
+	const earthRadiusMeters = 6371000.0 // Earth's radius in meters
+
+	latDelta := (radiusMeters / earthRadiusMeters) * (180 / math.Pi)
+	lngDelta := (radiusMeters / earthRadiusMeters) * (180 / math.Pi) / math.Cos(lat*math.Pi/180)
+
+	minLat := lat - latDelta
+	maxLat := lat + latDelta
+	minLng := lng - lngDelta
+	maxLng := lng + lngDelta
+
+	return minLat, maxLat, minLng, maxLng
 }
