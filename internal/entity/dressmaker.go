@@ -4,6 +4,7 @@ import (
 	"math"
 	"time"
 
+	"github.com/aoliveti/geohash"
 	"github.com/google/uuid"
 	"github.com/paulozy/costurai/pkg"
 )
@@ -31,6 +32,7 @@ type Dressmaker struct {
 	SubscriptionId *string       `json:"subscriptionId"`
 	Subscription   *Subscription `json:"subscription,omitempty"`
 	Address        Address       `json:"address"`
+	Geohash        string        `json:"geohash"`
 
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -59,6 +61,8 @@ func NewDressmaker(params CreateDressmakerInput) (*Dressmaker, error) {
 		return nil, err
 	}
 
+	geoHashStr, _ := geohash.Encode(params.Address.Location.Latitude, params.Address.Location.Longitude, geohash.Room)
+
 	dressmaker := &Dressmaker{
 		ID:        uuid.New().String(),
 		Email:     params.Email,
@@ -69,6 +73,7 @@ func NewDressmaker(params CreateDressmakerInput) (*Dressmaker, error) {
 		Grade:     0,
 		Enabled:   false,
 		Address:   params.Address,
+		Geohash:   geoHashStr,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}

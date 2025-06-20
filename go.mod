@@ -4,6 +4,7 @@ go 1.22.1
 
 require (
 	cloud.google.com/go/firestore v1.18.0
+	github.com/aoliveti/geohash v0.1.0
 	github.com/gin-contrib/cors v1.7.2
 	github.com/gin-gonic/gin v1.9.1
 	github.com/golang-jwt/jwt/v5 v5.2.2
@@ -12,7 +13,6 @@ require (
 	github.com/stripe/stripe-go/v82 v82.1.0
 	github.com/twilio/twilio-go v1.26.1
 	golang.org/x/crypto v0.31.0
-	google.golang.org/api v0.214.0
 )
 
 require (
@@ -74,6 +74,7 @@ require (
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.8.0 // indirect
+	google.golang.org/api v0.214.0 // indirect
 	google.golang.org/genproto v0.0.0-20241118233622-e639e219e697 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20241118233622-e639e219e697 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20241209162323-e6fa225c2576 // indirect
