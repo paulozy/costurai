@@ -22,7 +22,6 @@ type PaginationInfo struct {
 }
 
 func NewPaginatation(limit, page, total int64) *PaginationInfo {
-
 	var (
 		nextPage, prevPage *int64
 	)
@@ -66,14 +65,8 @@ type Offset struct {
 }
 
 func GetOffset[T interface{}](limit, page int64, slice []T) *Offset {
-	start := int((page - 1) * limit)
-	if start >= len(slice) {
-		start = len(slice)
-	}
-	end := start + int(limit)
-	if end > len(slice) {
-		end = len(slice)
-	}
+	start := min(int((page-1)*limit), len(slice))
+	end := min(start+int(limit), len(slice))
 
 	return &Offset{
 		Start: start,

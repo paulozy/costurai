@@ -85,8 +85,6 @@ func (r *FirestoreDressmakerRepository) FindByID(id string) (*entity.Dressmaker,
 }
 
 func (r *FirestoreDressmakerRepository) FindByProximity(latitude, longitude float64, maxDistance int) ([]entity.Dressmaker, error) {
-	fmt.Println("maxDistance", maxDistance)
-
 	minLat, maxLat, minLng, maxLng := getBoundingBox(latitude, longitude, float64(maxDistance))
 
 	query := r.Dressmakers.
@@ -101,7 +99,7 @@ func (r *FirestoreDressmakerRepository) FindByProximity(latitude, longitude floa
 		return nil, err
 	}
 
-	dressmakers := make([]entity.Dressmaker, 0, 50)
+	dressmakers := make([]entity.Dressmaker, 0, len(docs))
 	for _, doc := range docs {
 		var dressmaker *entity.Dressmaker
 		err = doc.DataTo(&dressmaker)
